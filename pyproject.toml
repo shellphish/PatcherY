@@ -10,8 +10,8 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
 ]
 license = {text = "BSD 2 Clause"}
-description = "The successor to PatcherX: PatcherY"
-urls = {Homepage = "https://github.com/shellphish-support-syndicate/artiphishell"}
+description = "The successor to Patcherex: PatcherY"
+urls = {Homepage = "https://github.com/shellphish/patchery"}
 requires-python = ">= 3.10"
 dependencies = [
     "tqdm",
