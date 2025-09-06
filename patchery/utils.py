@@ -5,8 +5,6 @@ from typing import Union, Optional
 from pathlib import Path
 from typing import List
 
-from crs_telemetry.utils import get_current_span
-
 import git
 
 from patchery.kumushi.data import PoI
@@ -202,14 +200,4 @@ def llm_cost(model_name: str, prompt_tokens: int, completion_tokens: int, cached
     cached_prompt_price = (cached_prompt_tokens / 1000000) * llm_price.get("cached_prompt_price", 0)
     cost = round(prompt_price + completion_price + cached_prompt_price, 5)
 
-    span = get_current_span()
-    span.set_attributes({"gen_ai.request.model": model_name,
-    "gen_ai.usage.input_tokens": prompt_tokens,
-    "gen_ai.usage.output_tokens": completion_tokens,
-    "gen_ai.usage.cached_read_tokens": cached_prompt_tokens,
-    "gen_ai.usage.total_tokens": prompt_tokens + completion_tokens,
-    "gen_ai.usage.cost_prompt": prompt_price,
-    "gen_ai.usage.cost_completion": completion_price,
-    "gen_ai.usage.cost": prompt_price + completion_price + cached_prompt_price,
-    })
     return cost

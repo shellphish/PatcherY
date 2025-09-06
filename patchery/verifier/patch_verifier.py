@@ -6,8 +6,6 @@ from pathlib import Path
 from typing import Any, Tuple, List, Type
 from patchery.kumushi.aixcc import AICCProgram
 
-from crs_telemetry.utils import get_otel_tracer
-
 from .verification_passes import (
     BaseVerificationPass,
     CompileVerificationPass,
@@ -25,7 +23,6 @@ from .. import Patch
 if typing.TYPE_CHECKING:
     from patchery.patcher import Patcher
 
-tracer = get_otel_tracer()
 _l = logging.getLogger(__name__)
 
 
@@ -58,7 +55,6 @@ class PatchVerifier:
             tempfile.TemporaryDirectory(dir=f"/shared/patchery/{self._prog_info.poi_report.project_id}", prefix="regression_fuzz_").name
         )
 
-    @tracer.start_as_current_span("patchery.verify")
     def verify(self, patch: Patch) -> Tuple[bool, Any]:
         verified = True
         reasoning = None

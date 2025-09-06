@@ -10,8 +10,6 @@ import yaml
 from shellphish_crs_utils.models.crs_reports import RepresentativeFullPoVReport, POIReport
 from shellphish_crs_utils.models.patch import PatchMetaData
 from shellphish_crs_utils.oss_fuzz.project import OSSFuzzProject
-from analysis_graph.models.crashes import GeneratedPatch
-from crs_telemetry.utils import get_otel_tracer, status_ok, get_current_span, status_error
 
 import patchery
 from patchery import Patcher, LLMPatchGenerator
@@ -22,8 +20,6 @@ from patchery.kumushi.rca_mode import RCAMode
 from patchery.kumushi.aixcc import AICCProgram
 from patchery.kumushi.data import ProgramInput, ProgramInputType, PoI, PoICluster, PoISource, Program
 from patchery.kumushi.util import load_clusters_from_yaml
-
-tracer = get_otel_tracer()
 
 _l = logging.getLogger(__name__)
 
@@ -62,7 +58,6 @@ class AICCPatcher(Patcher):
     # init helpers
     #
 
-    @tracer.start_as_current_span("kumushi_clustering")
     def poi_clusters_from_kumushi(self, kumushi_report=None):
         if not self._kumushi_clusters:
             _l.info("No KumuShi report provided, generating PoIs from local KumuShi run...")
@@ -90,14 +85,11 @@ class AICCPatcher(Patcher):
         assert patch_metadata_output_dir.exists()
         return patch_output_dir / patch_name, patch_metadata_output_dir / patch_name
 
-    @tracer.start_as_current_span("patchery.gen_and_verify_core")
     def _gen_and_verify_core(self, *args, **kwargs):
         return super()._gen_and_verify_core(*args, **kwargs)
 
-    @tracer.start_as_current_span("generate_verified_patches")
     def generate_verified_patches(self, *args, **kwargs):
         patcher_name = "PatcherY" if not self.smart_mode else "PatcherY_Smart"
-        span = get_current_span()
         verified_patches = super().generate_verified_patches(self.pois, **kwargs)
         if verified_patches:
             for patch_group in verified_patches:
@@ -109,25 +101,6 @@ class AICCPatcher(Patcher):
                     if build_request is None:
                         _l.critical("No build request ID found in patch metadata, using crash report ID instead.")
 
-                    # write patch diff
-                    for i in range(5):
-                        try:
-                            GeneratedPatch.upload_patch(
-                                self.program_info.poi_report.project_id,
-                                patch_output_file.name,
-                                patch_diff, self.program_info.poi_report.crash_report_id,
-                                [self.program_info.poi_report.crash_report_id],
-                                [],
-                                None,
-                                patcher_name=patcher_name,
-                                total_cost=patch_group['cost'],
-                                build_request_id=build_request,
-                                summary=summary,
-                            )
-                        except Exception as e:
-                            _l.error("Failed to upload patch: %s", e)
-                            import time
-                            time.sleep(30)
                     with open(patch_metadata_output_file, "w") as f:
                         patch_metadata: PatchMetaData = PatchMetaData(
                             patcher_name=patcher_name,
@@ -143,19 +116,13 @@ class AICCPatcher(Patcher):
                         f.write(patch_diff)
 
                     _l.info(f'Patch data saved! Patch: %s | Metadata: %s', patch_output_file, patch_metadata_output_file)
-                    span.add_event("generated_patch", {"patch": patch_diff})
-                    span.set_status(status_ok())
             _l.info(f"💸 The total cost of this patch was {self.total_cost} dollars.")
-            span.set_attributes({"gen_ai.request.model": self.model,
-                                 "gen_ai.usage.cost": self.total_cost, })
         else:
             _l.info(f"💸 We could not make a patch. The total cost was {self.total_cost} dollars.")
             _l.error("Failed to generate any verified patches.")
-            span.set_status(status_error(), "No patch generated.")
         return verified_patches
 
     @classmethod
-    @tracer.start_as_current_span("patchery.from_files")
     def from_files(
             cls,
             *args,

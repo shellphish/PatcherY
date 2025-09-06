@@ -8,11 +8,6 @@ import patchery
 from patchery import Patcher
 from patchery.ranker import PatchRanker
 from patchery.deduplicator import PatchDeduplicator
-from crs_telemetry.utils import init_otel, get_otel_tracer, status_ok, init_llm_otel, get_current_span, status_error
-
-init_otel("patchery", "patch_generation", "llm_patch_generation")
-init_llm_otel()
-tracer = get_otel_tracer()
 
 INFO_ONLY=os.getenv("INFO_ONLY", False)
 
@@ -25,7 +20,6 @@ else:
     _l.setLevel(logging.INFO)
     kumushi_logger.setLevel(logging.INFO)
 
-@tracer.start_as_current_span("patchery.main")
 def main():
     """
     Does the parsing of arguments and calls out to different sections of PatcherY responsible for different tasks.
@@ -280,37 +274,36 @@ def main():
 
         patcher: Patcher = None
         if args.generate_aixcc_patch:
-            with tracer.start_as_current_span("aixcc_patcher") as span:
-                from patchery.aicc_patcher import AICCPatcher
-                patcher = AICCPatcher.from_files(
-                    target_root=args.target_root,
-                    source_root=args.source_root,
-                    report_yaml_path=args.report_yaml,
-                    project_metadata_path=args.project_metadata,
-                    raw_report_path=args.raw_report,
-                    function_json_dir=args.function_json_dir,
-                    function_indices=args.function_indices,
-                    alerting_inputs_path=args.alerting_inputs,
-                    benign_inputs_path=args.benign_inputs,
-                    patch_output_dir=args.patch_output_dir,
-                    patch_metadata_output_dir=args.patch_meta_output_dir,
-                    c_reproducer_folder=args.c_reproducer_folder,
-                    kernel_image_dir=args.kernel_image_dir,
-                    invariance_report=args.invariance_report,
-                    crashing_commit=args.crashing_commit,
-                    indices_by_commit=args.indices_by_commit,
-                    changed_func_by_commit=args.functions_by_commit_jsons_dir,
-                    debug_report=args.debug_report,
-                    max_attempts=args.max_attempts,
-                    max_pois=args.max_pois,
-                    patch_planning=args.patch_planning,
-                    local_run=args.local_run,
-                    kumushi_report_path=args.kumushi_report,
-                    coverage_build_project_path=args.coverage_build_artifacts_path,
-                    patch_request_meta=args.patch_requests_meta,
-                    bypassing_inputs=args.bypassing_inputs,
-                    should_init_resolver=True,
-                )
+            from patchery.aicc_patcher import AICCPatcher
+            patcher = AICCPatcher.from_files(
+                target_root=args.target_root,
+                source_root=args.source_root,
+                report_yaml_path=args.report_yaml,
+                project_metadata_path=args.project_metadata,
+                raw_report_path=args.raw_report,
+                function_json_dir=args.function_json_dir,
+                function_indices=args.function_indices,
+                alerting_inputs_path=args.alerting_inputs,
+                benign_inputs_path=args.benign_inputs,
+                patch_output_dir=args.patch_output_dir,
+                patch_metadata_output_dir=args.patch_meta_output_dir,
+                c_reproducer_folder=args.c_reproducer_folder,
+                kernel_image_dir=args.kernel_image_dir,
+                invariance_report=args.invariance_report,
+                crashing_commit=args.crashing_commit,
+                indices_by_commit=args.indices_by_commit,
+                changed_func_by_commit=args.functions_by_commit_jsons_dir,
+                debug_report=args.debug_report,
+                max_attempts=args.max_attempts,
+                max_pois=args.max_pois,
+                patch_planning=args.patch_planning,
+                local_run=args.local_run,
+                kumushi_report_path=args.kumushi_report,
+                coverage_build_project_path=args.coverage_build_artifacts_path,
+                patch_request_meta=args.patch_requests_meta,
+                bypassing_inputs=args.bypassing_inputs,
+                should_init_resolver=True,
+            )
 
         if not isinstance(patcher, Patcher):
             raise ValueError("No patcher was created. Exiting.")

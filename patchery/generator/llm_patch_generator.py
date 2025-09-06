@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import List, Dict, Tuple
 from typing import Optional
 
-from crs_telemetry.utils import get_otel_tracer
 
 from .llm_prompting_styles import LLMPromptingStyles
 from .llm_utils import post_llm_requests, parse_llm_output, parse_search_patch, replace_search_patch
@@ -26,7 +25,6 @@ from .prompts.one_shot_prompts import (
 from patchery.kumushi.data import Program, PoI, PoISource, PoICluster
 from ..data import Patch, PatchedFunction
 
-tracer = get_otel_tracer()
 _l = logging.getLogger(__name__)
 
 class LLMPatchGenerator:
@@ -118,7 +116,6 @@ class LLMPatchGenerator:
                         patched_funcs.append(patched_func)
         return self.propose_patch(patched_funcs, reasoning=reasoning)
 
-    @tracer.start_as_current_span("patchery.generate_patch_in_loop")
     def _generate_patch_in_loop(self, original_prompt, output_parser="") -> Tuple[dict, float, str]:
         cost = 0.0
         # file_func_patchcode is a dictionary that stores dictionarys the function name and the patch code
@@ -265,7 +262,6 @@ class LLMPatchGenerator:
 
         return aggregated_patches
 
-    @tracer.start_as_current_span("patchery.generate_patch_one_shot")
     def _generate_patch_one_shot(
             self, poi_cluster: PoICluster, reports, failed_patch: Optional[Patch] = None, **kwargs
     ) -> Optional[Patch]:
