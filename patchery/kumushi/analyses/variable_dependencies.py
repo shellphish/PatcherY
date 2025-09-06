@@ -1,7 +1,7 @@
 import logging
 
-from kumushi.code_parsing import CodeFunction
-from kumushi.data import PoI, PoICluster, PoISource
+from patchery.kumushi.code_parsing import CodeFunction
+from patchery.kumushi.data import PoI, PoICluster, PoISource
 
 from .analysis import Analysis, AnalysisWeight
 

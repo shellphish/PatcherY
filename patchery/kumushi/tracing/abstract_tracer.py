@@ -1,7 +1,7 @@
 import logging
 
-from kumushi.data import ProgramInput, PoI, PoICluster
-from kumushi.aixcc import AICCProgram
+from patchery.kumushi.data import ProgramInput, PoI, PoICluster
+from patchery.kumushi.aixcc import AICCProgram
 
 _l = logging.getLogger(__name__)
 

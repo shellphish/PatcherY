@@ -2,11 +2,11 @@ import logging
 import yaml
 from typing import Tuple
 
-from kumushi.aixcc import AICCProgram
+from patchery.kumushi.aixcc import AICCProgram
 from .base_verification_pass import BaseVerificationPass
 from shellphish_crs_utils.models.testguy import TestGuyMetaData
 
-from kumushi.data import ProgramExitType
+from patchery.kumushi.data import ProgramExitType
 
 _l = logging.getLogger(__name__)
 

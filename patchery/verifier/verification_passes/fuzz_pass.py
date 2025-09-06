@@ -13,9 +13,9 @@ from typing import Optional
 
 from shellphish_crs_utils.oss_fuzz.instrumentation.jazzer import JazzerInstrumentation
 
-from kumushi.data import ProgramExitType
+from patchery.kumushi.data import ProgramExitType
 from .base_verification_pass import BaseVerificationPass
-from kumushi.data.program_input import ProgramInput, ProgramInputType
+from patchery.kumushi.data.program_input import ProgramInput, ProgramInputType
 from shellphish_crs_utils.oss_fuzz.project import InstrumentedOssFuzzProject
 from shellphish_crs_utils.oss_fuzz.instrumentation.aflpp import AFLPPInstrumentation
 from shellphish_crs_utils.oss_fuzz.instrumentation.aijon import AIJONInstrumentation

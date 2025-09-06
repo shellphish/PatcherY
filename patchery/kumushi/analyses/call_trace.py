@@ -1,9 +1,9 @@
 import logging
 from collections import Counter
 
-from kumushi.tracing.flexible_tracer import FlexibleTracer
-from kumushi.analyses.analysis import Analysis, AnalysisWeight
-from kumushi.data import PoI, PoISource, PoICluster
+from patchery.kumushi.tracing.flexible_tracer import FlexibleTracer
+from patchery.kumushi.analyses.analysis import Analysis, AnalysisWeight
+from patchery.kumushi.data import PoI, PoISource, PoICluster
 
 _l = logging.getLogger(__name__)
 

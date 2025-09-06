@@ -1,6 +1,6 @@
 from .base_verification_pass import BaseVerificationPass
 from ...data import JAZZER_CMD_INJECT_STR
-from kumushi.data import Program, ProgramExitType
+from patchery.kumushi.data import Program, ProgramExitType
 
 
 class AlertEliminationVerificationPass(BaseVerificationPass):

@@ -23,7 +23,7 @@ from .prompts.one_shot_prompts import (
     SUMMARIZE_REPORTS_PROMPT,
     FAILED_PATCH_PROMPT
 )
-from kumushi.data import Program, PoI, PoISource, PoICluster
+from patchery.kumushi.data import Program, PoI, PoISource, PoICluster
 from ..data import Patch, PatchedFunction
 
 tracer = get_otel_tracer()

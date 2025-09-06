@@ -4,7 +4,7 @@ from jinja2 import Template, StrictUndefined
 
 from .llm_tools import LLMTools
 from .prompts.strategy_prompts import STRATEGY_PROMPT
-from kumushi.data import PoICluster
+from patchery.kumushi.data import PoICluster
 
 _l = logging.getLogger(__name__)
 class LLMPlanStrategy:

@@ -3,8 +3,8 @@ from collections import defaultdict
 
 from .analyses import Analysis
 from .rca_mode import RCAMode
-from kumushi.data import PoICluster, PoI, PoISource, Program
-from kumushi.clustering import LLMClusterGenerator
+from patchery.kumushi.data import PoICluster, PoI, PoISource, Program
+from patchery.kumushi.clustering import LLMClusterGenerator
 
 _l = (logging.getLogger(__name__))
 

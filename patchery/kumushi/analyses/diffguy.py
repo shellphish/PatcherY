@@ -2,8 +2,8 @@ import logging
 
 from .analysis import Analysis
 from .analysis import AnalysisWeight
-from kumushi.data import PoI, PoICluster, PoISource
-from kumushi.code_parsing import CodeFunction
+from patchery.kumushi.data import PoI, PoICluster, PoISource
+from patchery.kumushi.code_parsing import CodeFunction
 
 _l = logging.getLogger(__name__)
 

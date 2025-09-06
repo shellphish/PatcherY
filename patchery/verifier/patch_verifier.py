@@ -4,7 +4,7 @@ import tempfile
 import typing
 from pathlib import Path
 from typing import Any, Tuple, List, Type
-from kumushi.aixcc import AICCProgram
+from patchery.kumushi.aixcc import AICCProgram
 
 from crs_telemetry.utils import get_otel_tracer
 

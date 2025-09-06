@@ -9,7 +9,7 @@ from crs_telemetry.utils import get_current_span
 
 import git
 
-from kumushi.data import PoI
+from patchery.kumushi.data import PoI
 import os
 
 import tlsh

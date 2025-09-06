@@ -2,7 +2,7 @@ import os
 
 from ..analysis import Analysis, AnalysisWeight
 from .aurora_ranker import AuroraRanker
-from kumushi.data.poi import PoI, PoICluster, PoISource, CodeFunction
+from patchery.kumushi.data.poi import PoI, PoICluster, PoISource, CodeFunction
 from shellphish_crs_utils.oss_fuzz.project import OSSFuzzProject
 
 from pathlib import Path

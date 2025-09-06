@@ -7,17 +7,17 @@ from shellphish_crs_utils.models.crs_reports import POIReport
 import hashlib
 from concurrent.futures import ProcessPoolExecutor, as_completed, TimeoutError as FutureTimeoutError
 
-from kumushi.analyses import Analysis, DEFAULT_ANALYSES, AnalysisWeight, StackTraceAnalysis, AnalysisTimeoutError
-from kumushi.data import PoICluster
-from kumushi.aixcc import AICCProgram
-from kumushi.static_tools.static_analysis import StaticAnalyzer
-from kumushi.util import TMP_POI_DIR, save_clusters_to_yaml, save_clusters_to_file, load_clusters_from_file
+from patchery.kumushi.analyses import Analysis, DEFAULT_ANALYSES, AnalysisWeight, StackTraceAnalysis, AnalysisTimeoutError
+from patchery.kumushi.data import PoICluster
+from patchery.kumushi.aixcc import AICCProgram
+from patchery.kumushi.static_tools.static_analysis import StaticAnalyzer
+from patchery.kumushi.util import TMP_POI_DIR, save_clusters_to_yaml, save_clusters_to_file, load_clusters_from_file
 from .analyses import WEIGHTLESS_ANALYSES
 from .rca_mode import RCAMode
 
 from .analyses import CallTraceAnalysis, VariableDependenciesAnalysis
 
-from kumushi.poi_cluster_ranker import PoIClusterRanker
+from patchery.kumushi.poi_cluster_ranker import PoIClusterRanker
 
 _DEBUG = os.getenv("DEBUG", "False") != "False"
 _l = (logging.getLogger(__name__))

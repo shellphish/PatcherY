@@ -8,7 +8,7 @@ import concurrent.futures
 import threading
 from pathlib import Path
 
-from kumushi.data import Program, PoICluster
+from patchery.kumushi.data import Program, PoICluster
 from .logger import MultiHandler
 from .generator import LLMPatchGenerator, LLMPromptingStyles, LLMPlanPatchGenerator, LLMTools
 from .generator.prompts.patch_summary import PATCH_SUMMARY_PROMPT
@@ -21,7 +21,7 @@ _l = logging.getLogger(__name__)
 _DEBUG = bool(os.getenv("DEBUG", False))
 
 if typing.TYPE_CHECKING:
-    from kumushi.aixcc import AICCProgram
+    from patchery.kumushi.aixcc import AICCProgram
 
 first_patch_found = threading.Event()  # Flag to signal first patch found
 

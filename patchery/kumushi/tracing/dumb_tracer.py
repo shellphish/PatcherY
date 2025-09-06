@@ -1,14 +1,14 @@
 import logging
 from pathlib import Path
 
-from kumushi.code_parsing import CodeFunction
-from kumushi.data import ProgramInput, Program, PoI, PoISource
-from kumushi.aixcc import AICCProgram
+from patchery.kumushi.code_parsing import CodeFunction
+from patchery.kumushi.data import ProgramInput, Program, PoI, PoISource
+from patchery.kumushi.aixcc import AICCProgram
 from collections import defaultdict
 import shutil
 import re
 
-from kumushi.tracing.abstract_tracer import AbstractTracer
+from patchery.kumushi.tracing.abstract_tracer import AbstractTracer
 
 _l = logging.getLogger(__name__)
 

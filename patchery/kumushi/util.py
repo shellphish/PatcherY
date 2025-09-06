@@ -6,8 +6,8 @@ from pathlib import Path
 import yaml
 from shellphish_crs_utils.models.crs_reports import KumushiRootCauseReport, KumushiPOICluster, KumushiPOI, KumushiCodeFunction
 
-from kumushi.code_parsing import CodeFunction
-from kumushi.data import PoI, PoICluster, PoISource, Program
+from patchery.kumushi.code_parsing import CodeFunction
+from patchery.kumushi.data import PoI, PoICluster, PoISource, Program
 _l = (logging.getLogger(__name__))
 TMP_POI_DIR = Path("/tmp/kumushi_poi")
 

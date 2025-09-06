@@ -1,10 +1,10 @@
 import logging
 
-from kumushi.aixcc import AICCProgram
-from kumushi.data import ProgramInput, PoI
-from kumushi.tracing.abstract_tracer import AbstractTracer
-from kumushi.tracing.smart_tracer import SmartCallTracer
-from kumushi.tracing.dumb_tracer import DumbCallTracer
+from patchery.kumushi.aixcc import AICCProgram
+from patchery.kumushi.data import ProgramInput, PoI
+from patchery.kumushi.tracing.abstract_tracer import AbstractTracer
+from patchery.kumushi.tracing.smart_tracer import SmartCallTracer
+from patchery.kumushi.tracing.dumb_tracer import DumbCallTracer
 from itertools import chain
 logging.getLogger("shellphish_crs_utils.function_resolver").setLevel(logging.ERROR)
 _l = logging.getLogger(__name__)
@@ -27,7 +27,7 @@ class FlexibleTracer(AbstractTracer):
             _l.warning("No program inputs provided for tracing, returning empty traces.")
             return traces
         if not self._is_smart and "c" in str(self.program.language).lower():
-            from kumushi.analyses.analysis import AnalysisTimeoutError
+            from patchery.kumushi.analyses.analysis import AnalysisTimeoutError
             try:
                 _l.info("Using DumbCallTracer to trace for analysis '%s'...", self._analysis_name or "unknown")
                 tracer = DumbCallTracer(self.program)

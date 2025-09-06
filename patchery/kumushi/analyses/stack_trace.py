@@ -3,8 +3,8 @@ import json
 import yaml
 import logging
 
-from kumushi.data.program import Program
-from kumushi.data.poi import PoI, PoICluster, PoISource, CodeFunction
+from patchery.kumushi.data.program import Program
+from patchery.kumushi.data.poi import PoI, PoICluster, PoISource, CodeFunction
 from shellphish_crs_utils.models import POIReport, FunctionIndex, CallTraceEntry
 from .analysis import Analysis, AnalysisWeight
 

@@ -15,11 +15,11 @@ from shellphish_crs_utils.models.oss_fuzz import AugmentedProjectMetadata
 from shellphish_crs_utils.models.testguy import TestGuyLibMetaData
 
 
-from kumushi.data.program_input import ProgramInput, ProgramInputType
+from patchery.kumushi.data.program_input import ProgramInput, ProgramInputType
 from shellphish_crs_utils.oss_fuzz.project import OSSFuzzProject
 from shellphish_crs_utils.function_resolver import LocalFunctionResolver, RemoteFunctionResolver, FunctionResolver
 
-from kumushi.data.program import Program
+from patchery.kumushi.data.program import Program
 
 from ..data.program_alert import ProgramExitType, ProgramAlert
 

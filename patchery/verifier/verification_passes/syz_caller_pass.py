@@ -6,8 +6,8 @@ from pathlib import Path
 
 from .base_verification_pass import BaseVerificationPass
 from ...utils import WorkDirContext
-from kumushi.aixcc import AICCProgram
-from kumushi.data import ProgramExitType
+from patchery.kumushi.aixcc import AICCProgram
+from patchery.kumushi.data import ProgramExitType
 
 _l = logging.getLogger(__name__)
 

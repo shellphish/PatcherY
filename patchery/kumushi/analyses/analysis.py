@@ -8,7 +8,7 @@ from ..data import PoICluster, Program
 from ..aixcc import AICCProgram
 
 if typing.TYPE_CHECKING:
-    from kumushi.root_cause_analyzer import RootCauseAnalyzer
+    from patchery.kumushi.root_cause_analyzer import RootCauseAnalyzer
 
 
 class AnalysisWeight(IntEnum):

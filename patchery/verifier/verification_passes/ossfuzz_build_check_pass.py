@@ -1,7 +1,7 @@
 import logging
 from typing import Tuple
 
-from kumushi.aixcc import AICCProgram
+from patchery.kumushi.aixcc import AICCProgram
 from .base_verification_pass import BaseVerificationPass
 
 _l = logging.getLogger(__name__)

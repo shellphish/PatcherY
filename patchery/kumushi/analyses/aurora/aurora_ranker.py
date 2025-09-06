@@ -1,9 +1,9 @@
 from shellphish_crs_utils.oss_fuzz.project import OSSFuzzProject
 from analysis_graph.models.harness_inputs import HarnessInputNode
-from kumushi.aixcc import AICCProgram
+from patchery.kumushi.aixcc import AICCProgram
 from neomodel import db
-from kumushi.data import PoI, ProgramInput, ProgramInputType
-from kumushi.tracing.flexible_tracer import FlexibleTracer
+from patchery.kumushi.data import PoI, ProgramInput, ProgramInputType
+from patchery.kumushi.tracing.flexible_tracer import FlexibleTracer
 
 from pathlib import Path
 import os

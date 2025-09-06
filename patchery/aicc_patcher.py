@@ -17,11 +17,11 @@ import patchery
 from patchery import Patcher, LLMPatchGenerator
 from patchery.utils import absolute_path_finder, read_src_from_file, find_src_root_from_commit, llm_model_name
 
-from kumushi.root_cause_analyzer import RootCauseAnalyzer
-from kumushi.rca_mode import RCAMode
-from kumushi.aixcc import AICCProgram
-from kumushi.data import ProgramInput, ProgramInputType, PoI, PoICluster, PoISource, Program
-from kumushi.util import load_clusters_from_yaml
+from patchery.kumushi.root_cause_analyzer import RootCauseAnalyzer
+from patchery.kumushi.rca_mode import RCAMode
+from patchery.kumushi.aixcc import AICCProgram
+from patchery.kumushi.data import ProgramInput, ProgramInputType, PoI, PoICluster, PoISource, Program
+from patchery.kumushi.util import load_clusters_from_yaml
 
 tracer = get_otel_tracer()
 

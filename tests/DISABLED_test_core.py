@@ -22,7 +22,7 @@ logging.basicConfig(level=logging.DEBUG)
 import patchery
 from patchery import Patcher
 from patchery.verifier.verification_passes import CompileVerificationPass
-from kumushi.code_parsing import CodeParser
+from patchery.kumushi.code_parsing import CodeParser
 from patchery.utils import WorkDirContext
 
 from common import TARGETS, PATCHES, GENERIC_TEST_DIR

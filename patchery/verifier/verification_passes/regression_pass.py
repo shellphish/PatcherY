@@ -3,7 +3,7 @@ import logging
 import typing
 from typing import Tuple
 
-from kumushi.data import ProgramInput, ProgramInputType, ProgramExitType
+from patchery.kumushi.data import ProgramInput, ProgramInputType, ProgramExitType
 from analysis_graph.models.crashes import BucketNode
 from .base_verification_pass import BaseVerificationPass
 from .fuzz_pass import INPUT_INFO
