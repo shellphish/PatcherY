@@ -1,4 +1,4 @@
-from patchery.kumushi.data import Program, PoICluster
+from patchery.data import Program, PoICluster
 
 
 class ClusterGenerator:

@@ -22,7 +22,7 @@ from .prompts.one_shot_prompts import (
     SUMMARIZE_REPORTS_PROMPT,
     FAILED_PATCH_PROMPT
 )
-from patchery.kumushi.data import Program, PoI, PoISource, PoICluster
+from patchery.data import Program, PoI, PoISource, PoICluster
 from ..data import Patch, PatchedFunction
 
 _l = logging.getLogger(__name__)

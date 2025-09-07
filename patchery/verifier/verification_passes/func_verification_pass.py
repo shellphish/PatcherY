@@ -6,7 +6,7 @@ from patchery.kumushi.aixcc import AICCProgram
 from .base_verification_pass import BaseVerificationPass
 from shellphish_crs_utils.models.testguy import TestGuyMetaData
 
-from patchery.kumushi.data import ProgramExitType
+from patchery.data import ProgramExitType
 
 _l = logging.getLogger(__name__)
 

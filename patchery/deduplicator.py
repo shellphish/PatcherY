@@ -5,7 +5,7 @@ from pathlib import Path
 
 import yaml
 
-from patchery.kumushi.data import Program
+from patchery.data import Program
 from patchery import Patch
 from patchery.utils import fuzzy_hash, compare_hashes, md5_hash
 

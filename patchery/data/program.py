@@ -8,10 +8,10 @@ import shutil
 import subprocess
 import git
 
-from .program_alert import ProgramExitType
-from .program_input import ProgramInput, ProgramInputType
-from ..code_parsing.code import Code, CodeParser
-from patchery.kumushi.data import PoICluster
+from patchery.data.program_alert import ProgramExitType
+from patchery.data.program_input import ProgramInput, ProgramInputType
+from patchery.kumushi.code_parsing.code import Code, CodeParser
+from patchery.data import PoICluster
 from shellphish_crs_utils.function_resolver import FunctionResolver, LocalFunctionResolver, RemoteFunctionResolver
 
 _l = logging.getLogger(__name__)

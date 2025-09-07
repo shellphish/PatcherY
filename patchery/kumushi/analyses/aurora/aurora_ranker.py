@@ -2,7 +2,7 @@ from shellphish_crs_utils.oss_fuzz.project import OSSFuzzProject
 from analysis_graph.models.harness_inputs import HarnessInputNode
 from patchery.kumushi.aixcc import AICCProgram
 from neomodel import db
-from patchery.kumushi.data import PoI, ProgramInput, ProgramInputType
+from patchery.data import PoI, ProgramInput, ProgramInputType
 from patchery.kumushi.tracing.flexible_tracer import FlexibleTracer
 
 from pathlib import Path

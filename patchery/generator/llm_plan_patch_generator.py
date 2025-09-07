@@ -18,7 +18,7 @@ from .prompts.one_shot_prompts import (
     WRONG_PATCH_REASONING
 )
 from .prompts.plan_prompts import INITIAL_PROMPT, FAILED_PROMPT, FORMAT_EXAMPLE
-from patchery.kumushi.data import PoICluster
+from patchery.data import PoICluster
 from ..data import Patch
 
 _l = logging.getLogger(__name__)

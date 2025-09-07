@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 from patchery.kumushi.code_parsing import CodeFunction
-from patchery.kumushi.data import ProgramInput, Program, PoI, PoISource
+from patchery.data import ProgramInput, Program, PoI, PoISource
 from patchery.kumushi.aixcc import AICCProgram
 from collections import defaultdict
 import shutil

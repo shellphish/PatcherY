@@ -8,7 +8,7 @@ import concurrent.futures
 import threading
 from pathlib import Path
 
-from patchery.kumushi.data import Program, PoICluster
+from patchery.data import Program, PoICluster
 from .logger import MultiHandler
 from .generator import LLMPatchGenerator, LLMPromptingStyles, LLMPlanPatchGenerator, LLMTools
 from .generator.prompts.patch_summary import PATCH_SUMMARY_PROMPT

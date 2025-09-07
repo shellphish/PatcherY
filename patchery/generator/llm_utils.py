@@ -6,7 +6,7 @@ import datetime
 
 from typing import List, Dict, Tuple
 
-from patchery.kumushi.data import Program
+from patchery.data import Program
 from agentlib import LLMFunction
 from ..utils import llm_cost, LLM_MAPPING
 

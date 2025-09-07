@@ -7,7 +7,7 @@ from typing import List
 
 import git
 
-from patchery.kumushi.data import PoI
+from patchery.data import PoI
 import os
 
 import tlsh

@@ -8,7 +8,7 @@ from patchery.kumushi.tracing.abstract_tracer import AbstractTracer
 _l = logging.getLogger(__name__)
 from pathlib import Path
 from patchery.kumushi.aixcc import AICCProgram
-from patchery.kumushi.data import PoI, PoISource, ProgramInput
+from patchery.data import PoI, PoISource, ProgramInput
 from shellphish_crs_utils.oss_fuzz.project import InstrumentedOssFuzzProject, OSSFuzzProject
 from shellphish_crs_utils.oss_fuzz.instrumentation.coverage_fast import CoverageFastInstrumentation
 

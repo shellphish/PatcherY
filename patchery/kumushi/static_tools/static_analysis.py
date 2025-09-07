@@ -11,7 +11,7 @@ import logging
 from libcodeql.client import CodeQLClient
 
 from patchery.kumushi.code_parsing import CodeFunction
-from patchery.kumushi.data import PoI, PoICluster
+from patchery.data import PoI, PoICluster
 
 _l = logging.getLogger(__name__)
 

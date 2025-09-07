@@ -3,7 +3,7 @@ import logging
 from typing import Tuple, Optional, Any, Type
 
 from patchery.data import Patch
-from patchery.kumushi.data import Program
+from patchery.data import Program
 
 _l = logging.getLogger(__name__)
 

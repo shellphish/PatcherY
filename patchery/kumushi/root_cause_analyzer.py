@@ -8,7 +8,7 @@ import hashlib
 from concurrent.futures import ProcessPoolExecutor, as_completed, TimeoutError as FutureTimeoutError
 
 from patchery.kumushi.analyses import Analysis, DEFAULT_ANALYSES, AnalysisWeight, StackTraceAnalysis, AnalysisTimeoutError
-from patchery.kumushi.data import PoICluster
+from patchery.data import PoICluster
 from patchery.kumushi.aixcc import AICCProgram
 from patchery.kumushi.static_tools.static_analysis import StaticAnalyzer
 from patchery.kumushi.util import TMP_POI_DIR, save_clusters_to_yaml, save_clusters_to_file, load_clusters_from_file

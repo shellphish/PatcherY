@@ -15,13 +15,13 @@ from shellphish_crs_utils.models.oss_fuzz import AugmentedProjectMetadata
 from shellphish_crs_utils.models.testguy import TestGuyLibMetaData
 
 
-from patchery.kumushi.data.program_input import ProgramInput, ProgramInputType
+from patchery.data.program_input import ProgramInput, ProgramInputType
 from shellphish_crs_utils.oss_fuzz.project import OSSFuzzProject
 from shellphish_crs_utils.function_resolver import LocalFunctionResolver, RemoteFunctionResolver, FunctionResolver
 
-from patchery.kumushi.data.program import Program
+from patchery.data.program import Program
 
-from ..data.program_alert import ProgramExitType, ProgramAlert
+from patchery.data.program_alert import ProgramExitType, ProgramAlert
 
 if typing.TYPE_CHECKING:
     from . import AICCProgram

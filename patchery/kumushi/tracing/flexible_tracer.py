@@ -1,7 +1,7 @@
 import logging
 
 from patchery.kumushi.aixcc import AICCProgram
-from patchery.kumushi.data import ProgramInput, PoI
+from patchery.data import ProgramInput, PoI
 from patchery.kumushi.tracing.abstract_tracer import AbstractTracer
 from patchery.kumushi.tracing.smart_tracer import SmartCallTracer
 from patchery.kumushi.tracing.dumb_tracer import DumbCallTracer

@@ -3,7 +3,7 @@ from collections import Counter
 
 from patchery.kumushi.tracing.flexible_tracer import FlexibleTracer
 from patchery.kumushi.analyses.analysis import Analysis, AnalysisWeight
-from patchery.kumushi.data import PoI, PoISource, PoICluster
+from patchery.data import PoI, PoISource, PoICluster
 
 _l = logging.getLogger(__name__)
 

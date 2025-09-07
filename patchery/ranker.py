@@ -8,7 +8,7 @@ from typing import Optional, List, Dict, Set
 
 from patchery.data import Patch
 from patchery.deduplicator import PatchDeduplicator
-from patchery.kumushi.data import Program
+from patchery.data import Program
 
 from shellphish_crs_utils.models.patch import PatchRankings
 

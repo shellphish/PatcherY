@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import List, Optional
 from enum import IntEnum
 
-from ..code_parsing import CodeFunction
+from patchery.kumushi.code_parsing import CodeFunction
 
 _l = logging.getLogger(__name__)
 

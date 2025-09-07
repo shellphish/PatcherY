@@ -1,11 +1,11 @@
 from pathlib import Path
-from typing import Dict, List
+from typing import List
 import logging
 
 
 import git
-from patchery.kumushi.data.program import Program
-from patchery.kumushi.data.poi import PoI, PoISource, CodeFunction, PoICluster
+from patchery.data.program import Program
+from patchery.data.poi import PoI, PoISource, CodeFunction, PoICluster
 import unidiff
 from shellphish_crs_utils.function_resolver import LocalFunctionResolver
 

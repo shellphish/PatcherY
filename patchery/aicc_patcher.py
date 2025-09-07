@@ -18,7 +18,7 @@ from patchery.utils import absolute_path_finder, read_src_from_file, find_src_ro
 from patchery.kumushi.root_cause_analyzer import RootCauseAnalyzer
 from patchery.kumushi.rca_mode import RCAMode
 from patchery.kumushi.aixcc import AICCProgram
-from patchery.kumushi.data import ProgramInput, ProgramInputType, PoI, PoICluster, PoISource, Program
+from patchery.data import ProgramInput, ProgramInputType, PoI, PoICluster, PoISource, Program
 from patchery.kumushi.util import load_clusters_from_yaml
 
 _l = logging.getLogger(__name__)

@@ -1,12 +1,8 @@
-import os
-
 from ..analysis import Analysis, AnalysisWeight
 from .aurora_ranker import AuroraRanker
-from patchery.kumushi.data.poi import PoI, PoICluster, PoISource, CodeFunction
+from patchery.data.poi import PoI, PoICluster, PoISource
 from shellphish_crs_utils.oss_fuzz.project import OSSFuzzProject
 
-from pathlib import Path
-import tempfile
 import logging
 
 _l = logging.getLogger(__name__)
