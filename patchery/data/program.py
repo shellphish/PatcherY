@@ -12,7 +12,12 @@ from patchery.data.program_alert import ProgramExitType
 from patchery.data.program_input import ProgramInput, ProgramInputType
 from patchery.kumushi.code_parsing.code import Code, CodeParser
 from patchery.data import PoICluster
-from shellphish_crs_utils.function_resolver import FunctionResolver, LocalFunctionResolver, RemoteFunctionResolver
+
+HAS_AIXCC = True
+try:
+    from shellphish_crs_utils.function_resolver import FunctionResolver, LocalFunctionResolver, RemoteFunctionResolver
+except ImportError:
+    HAS_AIXCC = False
 
 _l = logging.getLogger(__name__)
 
@@ -20,7 +25,7 @@ class Program:
     def __init__(
         self,
         source_root: Path,
-        function_resolver: FunctionResolver = None,
+        function_resolver = None,
         crashing_inputs: list[ProgramInput] | None = None,
         language=None,
         should_init_resolver: bool = False,
@@ -31,18 +36,19 @@ class Program:
         self._should_init_resolver = should_init_resolver
         self.function_resolver = function_resolver if self._should_init_resolver else None
         # save the args to recreate the function resolver later (if needed for pickling)
-        if isinstance(function_resolver, RemoteFunctionResolver):
-            self._saved_resolver_args = (
-                function_resolver.cp_name,
-                function_resolver.project_id,
-            )
-            self._saved_resolver_cls = RemoteFunctionResolver
-        elif isinstance(function_resolver, LocalFunctionResolver):
-            self._saved_resolver_args = (
-                function_resolver.functions_index_path,
-                function_resolver.functions_jsons_path,
-            )
-            self._saved_resolver_cls = LocalFunctionResolver
+        if HAS_AIXCC:
+            if isinstance(function_resolver, RemoteFunctionResolver):
+                self._saved_resolver_args = (
+                    function_resolver.cp_name,
+                    function_resolver.project_id,
+                )
+                self._saved_resolver_cls = RemoteFunctionResolver
+            elif isinstance(function_resolver, LocalFunctionResolver):
+                self._saved_resolver_args = (
+                    function_resolver.functions_index_path,
+                    function_resolver.functions_jsons_path,
+                )
+                self._saved_resolver_cls = LocalFunctionResolver
 
         self._git_repo = git.Repo(str(self.source_root)) if (self.source_root / ".git").exists() else None
         self._versioned_code = {}

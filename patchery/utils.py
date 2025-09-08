@@ -1,16 +1,19 @@
 import hashlib
 import logging
 import time
+import typing
 from typing import Union, Optional
 from pathlib import Path
 from typing import List
 
 import git
 
-from patchery.data import PoI
 import os
 
 import tlsh
+
+if typing.TYPE_CHECKING:
+    from patchery.data import PoI
 
 _l = logging.getLogger(__name__)
 
@@ -148,7 +151,7 @@ def absolute_path_finder(src_root: Path, relative_file_path: Path) -> Path | Non
     return None
 
 
-def pois_filepath_abs(src_root: Path, pois: List[PoI]) -> List[PoI]:
+def pois_filepath_abs(src_root: Path, pois: List["PoI"]) -> List["PoI"]:
     # TODO: update this later, maybe this can be deprecated?
     return pois
 
