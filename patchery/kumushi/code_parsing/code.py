@@ -1,13 +1,11 @@
 from pathlib import Path
 import logging
 
-from .clang_cache import ClangCache
+from .clang_cache import ClangCache, HAS_AIXCC
 from .java_cache import JavaCache
 from .code_function import CodeFunction
 from .code_parser import CodeParser
 
-from shellphish_crs_utils.function_resolver import FunctionResolver, RemoteFunctionResolver, LocalFunctionResolver
-from shellphish_crs_utils.models.symbols import SourceLocation, JavaInfo
 _l = logging.getLogger(__name__)
 
 
@@ -21,8 +19,8 @@ class Code:
             self,
             source_root: Path,
             language: str | None = None,
-            function_resolver: FunctionResolver | None = None,
-            saved_resolver_cls: type[FunctionResolver] = None,
+            function_resolver: None = None,
+            saved_resolver_cls = None,
             saved_resolver_args: tuple = None,
     ):
         self.source_root = source_root
@@ -44,6 +42,9 @@ class Code:
     def functions_by_name(self, funcname: str, focus_repo_only: bool = False, java_full_method: str = None) -> list[CodeFunction]:
         functions = []
         java_info = None
+        if not HAS_AIXCC:
+            return []
+
         if java_full_method is not None:
             class_path = "".join(java_full_method.split('.')[:-1])
             if class_path and '.' in class_path:

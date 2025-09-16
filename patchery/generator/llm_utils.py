@@ -105,6 +105,7 @@ def get_llm_params(model: str, temperature: float, enable_thinking = False) -> T
 
     return temperature, reasoning_effort, think_param
 
+_l.setLevel(logging.DEBUG)
 
 
 def post_llm_requests(messages: List[Dict], temperature: float, model: str, enable_thinking: bool = False) -> Tuple[
@@ -115,10 +116,10 @@ def post_llm_requests(messages: List[Dict], temperature: float, model: str, enab
         key = os.environ.get("LITELLM_KEY")
     else:
         raise ValueError(f"Missing LLM API KEY")
-    if os.getenv("AIXCC_LITELLM_HOSTNAME"):
-        query_api = os.environ.get("AIXCC_LITELLM_HOSTNAME")
-    else:
-        raise ValueError(f"Missing LLM API ENDPOINT URL")
+    #if os.getenv("AIXCC_LITELLM_HOSTNAME"):
+    #    query_api = os.environ.get("AIXCC_LITELLM_HOSTNAME")
+    #else:
+    #    raise ValueError(f"Missing LLM API ENDPOINT URL")
     # if 'o1' in model or 'o3' in model or 'o4' in model:
     #     temperature = 1
     #     reasoning_effort = 'medium'
@@ -133,19 +134,23 @@ def post_llm_requests(messages: List[Dict], temperature: float, model: str, enab
     if model not in LLM_MAPPING.values():
         _l.warning(f"Unknown model: {model}")
         model = LLM_MAPPING.get('claude-3.7-sonnet')
+
     user_budget = _get_model_budget(model)
     if user_budget is None:
         raise RuntimeError(f"Unknown model: {model}")
     fallbacks = get_llm_backups(model)
     fallback_index = 0
     send_model = model
+    # TODO: FIX ME
+    send_model = "claude-3-7-sonnet-20250219"
+
     user_budget = _get_model_budget(model)
     while True:
         # TODO: put manual fallback calculation here
         try:
             adj_temperature, reasoning_effort, thinking_param = get_llm_params(send_model, temperature, enable_thinking)
             response = completion(
-                model=send_model, messages=messages, api_key=key, base_url=query_api,
+                model=send_model, messages=messages, api_key=key,
                 temperature=adj_temperature, num_retries=3, timeout=30, user=user_budget,
                 reasoning_effort=reasoning_effort, drop_params=True,
                 # thinking=thinking_param,
@@ -163,9 +168,10 @@ def post_llm_requests(messages: List[Dict], temperature: float, model: str, enab
                 user_budget = _get_model_budget(model)
                 time.sleep(30)
                 continue
+            print(e)
             send_model = fallbacks[fallback_index]
             _l.info(f"trying {send_model} instead")
-            user_budget = _get_model_budget(send_model)
+            #user_budget = _get_model_budget(send_model)
             time.sleep(30)
             fallback_index += 1
 

@@ -2,7 +2,12 @@ import json
 from pathlib import Path
 import logging
 
-from shellphish_crs_utils.function_resolver import FunctionIndex, RemoteFunctionResolver
+HAS_AIXCC = True
+try:
+    from shellphish_crs_utils.function_resolver import FunctionIndex, RemoteFunctionResolver
+except ImportError:
+    HAS_AIXCC = False
+
 
 from .code_function import CodeFunction
 
@@ -74,10 +79,13 @@ class ClangCache:
     def load_function_data(self, functions_dir, source_root, version):
         functions = []
         for func_json in functions_dir.glob("*.json"):
-            try:
-                func_info = FunctionIndex.model_validate(json.loads(func_json.read_text()))
-            except json.JSONDecodeError:
-                _l.critical(f"Error decoding %s as json. Skipping.", func_json)
+            if HAS_AIXCC:
+                try:
+                    func_info = FunctionIndex.model_validate(json.loads(func_json.read_text()))
+                except json.JSONDecodeError:
+                    _l.critical(f"Error decoding %s as json. Skipping.", func_json)
+                    continue
+            else:
                 continue
             name = func_info.funcname
             start_line = func_info.start_line

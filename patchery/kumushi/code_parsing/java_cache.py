@@ -2,7 +2,11 @@ import json
 from pathlib import Path
 import logging
 
-from shellphish_crs_utils.function_resolver import FunctionIndex
+HAS_AIXCC = True
+try:
+    from shellphish_crs_utils.function_resolver import FunctionIndex
+except ImportError:
+    HAS_AIXCC = False
 
 from .code_function import CodeFunction
 
@@ -60,10 +64,13 @@ class JavaCache:
 
         functions = []
         for func_json in functions_dir.glob("*.json"):
-            try:
-                func_info = FunctionIndex.model_validate(json.loads(func_json.read_text()))
-            except json.JSONDecodeError:
-                _l.critical(f"Error decoding %s as json. Skipping.", func_json)
+            if HAS_AIXCC:
+                try:
+                    func_info = FunctionIndex.model_validate(json.loads(func_json.read_text()))
+                except json.JSONDecodeError:
+                    _l.critical(f"Error decoding %s as json. Skipping.", func_json)
+                    continue
+            else:
                 continue
 
             name = func_info.funcname

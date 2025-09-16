@@ -1,6 +1,5 @@
 from pathlib import Path
 import logging
-from shellphish_crs_utils.models.indexer import GlobalVariableReference
 
 _l = logging.getLogger(__name__)
 
@@ -15,7 +14,7 @@ class CodeFunction:
         end_line: int,
         file_path: str | None | Path = None,
         code: str | None = None,
-        global_vars: list[GlobalVariableReference] | None = None,
+        global_vars: list | None = None,
         version: str | None = None,
         is_macro: bool = False,
         function_index: str | None = None,
