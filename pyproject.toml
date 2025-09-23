@@ -16,7 +16,7 @@ requires-python = ">= 3.10"
 dependencies = [
     "tqdm",
     "pyyaml",
-    "gitpython",
+    "GitPython",
     "tree-sitter==0.21.3",
     "tree-sitter-languages",
     "PyYAML",
@@ -24,11 +24,13 @@ dependencies = [
     "jinja2",
     'py-tlsh',
     'openai',
+    "langchain>=1.0.0a7",
     'requests',
     'unidiff',
     'numpy',
-    'litellm==1.63.14'
+    "pre-commit"
 ]
+
 dynamic = ["version"]
 
 [project.readme]

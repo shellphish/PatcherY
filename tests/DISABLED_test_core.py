@@ -1,31 +1,29 @@
+import logging
 import os
-import sys
+import shutil
 import subprocess
+import sys
+import tempfile
 import textwrap
 import unittest
-import tempfile
 from pathlib import Path
-import shutil
+from subprocess import CalledProcessError, run
 from tempfile import NamedTemporaryFile
-from subprocess import run, CalledProcessError
 from typing import Optional
 
 import git
-
-import logging
-
 from patchery.report import Report
 
 logging.basicConfig(level=logging.DEBUG)
 
 
+from common import GENERIC_TEST_DIR, PATCHES, TARGETS
+
 import patchery
 from patchery import Patcher
-from patchery.verifier.verification_passes import CompileVerificationPass
 from patchery.kumushi.code_parsing import CodeParser
 from patchery.utils import WorkDirContext
-
-from common import TARGETS, PATCHES, GENERIC_TEST_DIR
+from patchery.verifier.verification_passes import CompileVerificationPass
 
 #
 # Testing Utils
@@ -36,7 +34,10 @@ FAKE_GIT_REPOS = [
     TARGETS / "hamlin/challenge/src",
 ]
 
-GIT_REPOS = [TARGETS / "jenkins/src/plugins/pipeline-util-plugin", TARGETS / "kernel/src"]
+GIT_REPOS = [
+    TARGETS / "jenkins/src/plugins/pipeline-util-plugin",
+    TARGETS / "kernel/src",
+]
 
 
 def apply_patch_text(repo_path, target_file, patch_file_path) -> str:
@@ -60,14 +61,18 @@ def apply_patch_text(repo_path, target_file, patch_file_path) -> str:
     return patched_code
 
 
-def patch_func_from_patch_file(repo_path, target_file, func_name, patch_file_path, lang="C") -> list[PatchedFunction]:
+def patch_func_from_patch_file(
+    repo_path, target_file, func_name, patch_file_path, lang="C"
+) -> list[PatchedFunction]:
     """
     Applies a patch to a file and extracts the target function.
     """
     new_file_text = apply_patch_text(repo_path, target_file, patch_file_path)
     parser = CodeParser.from_code_string(new_file_text, func_name, lang=lang)
     new_func_code = parser.func_code(func_name)
-    func_patch = PatchedFunction(function_name=func_name, file=target_file, new_code=new_func_code)
+    func_patch = PatchedFunction(
+        function_name=func_name, file=target_file, new_code=new_func_code
+    )
     return [func_patch]
 
 
@@ -116,7 +121,11 @@ class SimpleExecutor(Executor):
 
             with WorkDirContext(self._runner_path.parent):
                 try:
-                    proc = run(["./run.sh", "run", input_file.name], capture_output=True, check=True)
+                    proc = run(
+                        ["./run.sh", "run", input_file.name],
+                        capture_output=True,
+                        check=True,
+                    )
                     crash = False
                 except CalledProcessError as e:
                     crash = True
@@ -142,7 +151,9 @@ class SimpleProgram(Program):
                 compile_cmd += f"{patch_path}"
             failed = False
             try:
-                proc = subprocess.run(compile_cmd.split(), capture_output=True, text=True)
+                proc = subprocess.run(
+                    compile_cmd.split(), capture_output=True, text=True
+                )
             except Exception as e:
                 print(f"Compilation failed: {e}")
                 failed = True
@@ -186,7 +197,11 @@ class TestPatcheryCore(unittest.TestCase):
         # an AI agent, but for this we are just using the source code and a pre-computed patch.
         perfect_patch = Patch(
             patch_func_from_patch_file(
-                source_root, target_file, "handle_AUTH", PATCHES / "adams_good.patch", lang=prog_info.lang
+                source_root,
+                target_file,
+                "handle_AUTH",
+                PATCHES / "adams_good.patch",
+                lang=prog_info.lang,
             ),
             reasoning="Perfect patch.",
         )
@@ -202,7 +217,10 @@ class TestPatcheryCore(unittest.TestCase):
             temp_patch.write(generated_patch_diff.encode())
             temp_patch.seek(0)
 
-            proc = subprocess.run(["git", "-C", str(source_root), "apply", temp_patch.name], cwd=GENERIC_TEST_DIR)
+            proc = subprocess.run(
+                ["git", "-C", str(source_root), "apply", temp_patch.name],
+                cwd=GENERIC_TEST_DIR,
+            )
             assert proc.returncode == 0
 
     def test_valid_patch_compile(self):
@@ -218,7 +236,11 @@ class TestPatcheryCore(unittest.TestCase):
         # load a pre-computed perfect patch
         perfect_patch = Patch(
             patch_func_from_patch_file(
-                source_root, target_file, "ArrayHistory::copy", PATCHES / "hamlin_good.patch", lang=prog_info.lang
+                source_root,
+                target_file,
+                "ArrayHistory::copy",
+                PATCHES / "hamlin_good.patch",
+                lang=prog_info.lang,
             ),
             reasoning="Perfect patch.",
         )
@@ -231,7 +253,9 @@ class TestPatcheryCore(unittest.TestCase):
     def test_alert_generation(self):
         hamlin_chall = TARGETS / "hamlin/challenge"
         source_root = TARGETS / "hamlin/challenge/src"
-        prog_info = SimpleProgram(hamlin_chall / "run.sh", source_root=source_root, lang="C++")
+        prog_info = SimpleProgram(
+            hamlin_chall / "run.sh", source_root=source_root, lang="C++"
+        )
         # create a binary for execution
         compiled, _ = prog_info.compile()
         if not compiled:
@@ -242,8 +266,16 @@ class TestPatcheryCore(unittest.TestCase):
             alerting_input = f.read()
         benign_input = b"benign"
 
-        assert prog_info.triggers_alert(ProgramInput(alerting_input, ProgramInputType.FILE)) is True
-        assert prog_info.triggers_alert(ProgramInput(benign_input, ProgramInputType.FILE)) is False
+        assert (
+            prog_info.triggers_alert(
+                ProgramInput(alerting_input, ProgramInputType.FILE)
+            )
+            is True
+        )
+        assert (
+            prog_info.triggers_alert(ProgramInput(benign_input, ProgramInputType.FILE))
+            is False
+        )
 
     def test_end_to_end_hamlin(self):
         source_root = TARGETS / "hamlin/challenge/src"
@@ -256,7 +288,9 @@ class TestPatcheryCore(unittest.TestCase):
         prog_info = SimpleProgram(
             TARGETS / "hamlin/challenge/run.sh",
             source_root=source_root,
-            alerting_inputs=AICCProgram.load_inputs_from_dir(TARGETS / "hamlin/alerting_inputs"),
+            alerting_inputs=AICCProgram.load_inputs_from_dir(
+                TARGETS / "hamlin/alerting_inputs"
+            ),
             lang="C++",
         )
 
@@ -268,19 +302,31 @@ class TestPatcheryCore(unittest.TestCase):
         hamlin_bin = TARGETS / "hamlin/challenge/hamlin.bin"
         with open(TARGETS / "hamlin/alerting_inputs/crash_input", "rb") as f:
             crashing_input_data = f.read()
-        proc = subprocess.run([hamlin_bin], capture_output=True, input=crashing_input_data, env=env, text=False)
+        proc = subprocess.run(
+            [hamlin_bin],
+            capture_output=True,
+            input=crashing_input_data,
+            env=env,
+            text=False,
+        )
         assert b"ERROR: AddressSanitizer" in proc.stderr
         model = os.getenv("AIXCC_MODEL_LLM", default="oai-gpt-o1-preview")
         patcher = Patcher(prog_info, max_patches=1, max_attempts=5, model=model)
         crashing_input = ProgramInput(crashing_input_data, ProgramInputType.FILE)
-        #bug_info = BugInfo(crashing_input, poi_clusters=[PoICluster.from_pois([poi])], reports=[Report(poi.report)])
+        # bug_info = BugInfo(crashing_input, poi_clusters=[PoICluster.from_pois([poi])], reports=[Report(poi.report)])
         verified_patches = patcher.generate_verified_patches()
         assert bool(verified_patches)
 
         verified_patch = verified_patches[0]
         prog_info.compile(verified_patch)
         # validate the patch actually fixed the issue
-        proc = subprocess.run([hamlin_bin], capture_output=True, input=crashing_input.data, env=env, text=False)
+        proc = subprocess.run(
+            [hamlin_bin],
+            capture_output=True,
+            input=crashing_input.data,
+            env=env,
+            text=False,
+        )
         assert b"ERROR: AddressSanitizer" not in proc.stderr
 
     @unittest.skip("Does not work while clang_indexer is disabled")
