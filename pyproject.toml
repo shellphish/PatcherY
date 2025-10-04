@@ -66,7 +66,6 @@ version = {attr = "patchery.__version__"}
 
 [tool.ruff]
 target-version = "py310"
-line-length = 120
 
 [tool.ruff.lint]
 # Enable basic rule sets
