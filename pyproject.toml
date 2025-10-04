@@ -28,7 +28,9 @@ dependencies = [
     'requests',
     'unidiff',
     'numpy',
-    "pre-commit"
+    "pre-commit",
+    "pydantic",
+    'jq'
 ]
 
 dynamic = ["version"]
