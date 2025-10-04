@@ -6,7 +6,7 @@ from pathlib import Path
 import yaml
 
 from patchery.data import Program
-from patchery import Patch
+from patchery.data.patch import Patch
 from patchery.utils import fuzzy_hash, compare_hashes, md5_hash
 
 from itertools import combinations
@@ -16,12 +16,14 @@ _DEBUG = 0
 GROUND_TRUTH_PATH = os.getenv("GROUND_TRUTH_PATH", None)
 _l = logging.getLogger(__name__)
 
+
 class PatchDeduplicator:
     SIMILARITY_THRESHOLD = 0.9
 
     """
     Deduplicates patches based on their content.
     """
+
     def __init__(self, patches: list[Patch], program: Program | None = None):
         self.patches = patches
         self._program = program
@@ -93,7 +95,9 @@ class PatchDeduplicator:
             seed = max(ungrouped, key=degree.__getitem__)
             clique = {seed}
             # consider remaining nodes in descending degree order
-            for node in sorted(ungrouped - {seed}, key=degree.__getitem__, reverse=True):
+            for node in sorted(
+                ungrouped - {seed}, key=degree.__getitem__, reverse=True
+            ):
                 if all(similar[node][member] for member in clique):
                     clique.add(node)
 
@@ -104,8 +108,8 @@ class PatchDeduplicator:
 
     @staticmethod
     def bucket_by_similarity(
-            patches_by_name: Dict[str, List["Patch"]],
-            sim_threshold: float = 0.90,
+        patches_by_name: Dict[str, List["Patch"]],
+        sim_threshold: float = 0.90,
     ) -> Dict[str, List[List["Patch"]]]:
         """
         Bucket patches *only within the same `func_name`*.
@@ -135,7 +139,9 @@ class PatchDeduplicator:
         return buckets_by_name
 
     @staticmethod
-    def _bucket_by_similarity(patches_by_name: dict[str, list[Patch]], sim_threshold=0.9) -> list[list[Patch]]:
+    def _bucket_by_similarity(
+        patches_by_name: dict[str, list[Patch]], sim_threshold=0.9
+    ) -> list[list[Patch]]:
         bucketed_patches = []
         for func_name, patches in patches_by_name.items():
             if len(patches) == 1:
@@ -160,7 +166,9 @@ class PatchDeduplicator:
                             continue
 
                         # compare the hashes
-                        similarity_score = compare_hashes(patch_hash, other_hash, normalize=True)
+                        similarity_score = compare_hashes(
+                            patch_hash, other_hash, normalize=True
+                        )
                         if similarity_score < sim_threshold:
                             # we have a duplicate
                             duplicates.append((patch, other_patch))
@@ -214,8 +222,13 @@ class PatchDeduplicator:
 
     def deduplicate(self) -> list[list[Patch]]:
         patch_by_func_names = self.bucket_by_function_names(self.patches)
-        patch_by_similarity = self.bucket_by_similarity(patch_by_func_names, sim_threshold=self.SIMILARITY_THRESHOLD)
-        sim_buckets = [[item for sublist in x for item in sublist] for x in patch_by_similarity.values()]
+        patch_by_similarity = self.bucket_by_similarity(
+            patch_by_func_names, sim_threshold=self.SIMILARITY_THRESHOLD
+        )
+        sim_buckets = [
+            [item for sublist in x for item in sublist]
+            for x in patch_by_similarity.values()
+        ]
 
         # check if we have metadata
         first_patch = self.patches[0]
@@ -254,7 +267,6 @@ class PatchDeduplicator:
                     cpv_data.append(cpv_id)
             buckets_of_cpvs.append(cpv_data)
 
-
     @classmethod
     def dedupe_many_aicc_patch_dirs(
         cls,
@@ -262,13 +274,16 @@ class PatchDeduplicator:
         patch_metadata_dir: Path | None = None,
         **kwargs,
     ):
-        deduplicator = cls.from_patch_dir(patches_dir, patch_metadata_dir=patch_metadata_dir)
+        deduplicator = cls.from_patch_dir(
+            patches_dir, patch_metadata_dir=patch_metadata_dir
+        )
         patch_buckets = deduplicator.deduplicate()
         return patch_buckets
 
-
     @classmethod
-    def from_patch_dir(cls, patch_dir: Path, patch_metadata_dir: Path | None = None, **kwargs):
+    def from_patch_dir(
+        cls, patch_dir: Path, patch_metadata_dir: Path | None = None, **kwargs
+    ):
         patch_dir = Path(patch_dir).absolute()
         patch_metadata = {}
         if patch_metadata_dir:
@@ -280,7 +295,6 @@ class PatchDeduplicator:
                         metadata = yaml.unsafe_load(f.read())
                     patch_metadata[file.stem] = metadata
 
-
         # we select patches in the dir based on if they have metadata
         patch_files = []
         if patch_metadata:
@@ -290,13 +304,19 @@ class PatchDeduplicator:
                     patch_files.append(patch_file)
         else:
             # no metadata, just select all files in the directory
-            patch_files = [p for p in patch_dir.glob("*") if p.is_file() and p.suffix not in [".json", ".yaml"]]
+            patch_files = [
+                p
+                for p in patch_dir.glob("*")
+                if p.is_file() and p.suffix not in [".json", ".yaml"]
+            ]
 
         # find all the patches
         patches = []
         for file in patch_files:
             # we have a patch file
-            patch = Patch.from_git_diff(file, metadata=patch_metadata.get(file.stem, None))
+            patch = Patch.from_git_diff(
+                file, metadata=patch_metadata.get(file.stem, None)
+            )
             patches.append(patch)
 
         return cls(patches, **kwargs)

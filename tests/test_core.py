@@ -189,6 +189,7 @@ class TestPatcheryCore(unittest.TestCase):
 
         output = subprocess.run(["patchery", "--version"], capture_output=True)
         version = output.stdout.decode().strip()
+
         assert version == patchery.__version__
 
     @unittest.skip("Skipping patch diffing test")
@@ -283,6 +284,7 @@ class TestPatcheryCore(unittest.TestCase):
             prog_info.triggers_alert(ProgramInput(benign_input, ProgramInputType.FILE))
             is False
         )
+
     @unittest.skip("Skipping end to end hamlin test")
     def test_end_to_end_hamlin(self):
         source_root = TARGETS / "hamlin/challenge/src"
