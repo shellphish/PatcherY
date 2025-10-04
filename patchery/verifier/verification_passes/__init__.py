@@ -2,7 +2,7 @@ from .base_verification_pass import BaseVerificationPass
 from .compile_pass import CompileVerificationPass
 from .alert_elim_pass import AlertEliminationVerificationPass
 from .syz_caller_pass import SyzCallerVerificationPass
-from .func_verification_pass import FunctionalityVerificationPass
 from .duplicate_check_pass import DuplicateVerificationPass
 from .new_code_check_pass import NewCodeCheckPass
-from .regression_pass import RegressionPass
+# from .regression_pass import RegressionPass
+# from .func_verification_pass import FunctionalityVerificationPass

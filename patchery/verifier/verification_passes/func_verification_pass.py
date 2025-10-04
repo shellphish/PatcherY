@@ -4,11 +4,11 @@ from typing import Tuple
 
 from patchery.kumushi.aixcc import AICCProgram
 from .base_verification_pass import BaseVerificationPass
-from shellphish_crs_utils.models.testguy import TestGuyMetaData
 
 from patchery.data import ProgramExitType
 
 _l = logging.getLogger(__name__)
+
 
 class FunctionalityVerificationPass(BaseVerificationPass):
     def __init__(self, *args, requires_executor=True, **kwargs):

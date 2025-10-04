@@ -1,0 +1,20 @@
+exclude: ^tests/generic_tests/targets/
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: ["--fix=no"]
+      - id: trailing-whitespace
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.27.0
+    hooks:
+      - id: check-dependabot
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.8
+    hooks:
+      - id: ruff-format

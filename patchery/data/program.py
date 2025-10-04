@@ -15,17 +15,22 @@ from patchery.data import PoICluster
 
 HAS_AIXCC = True
 try:
-    from shellphish_crs_utils.function_resolver import FunctionResolver, LocalFunctionResolver, RemoteFunctionResolver
+    from patchery.data.function_resolver import (
+        FunctionResolver,
+        LocalFunctionResolver,
+        RemoteFunctionResolver,
+    )
 except ImportError:
     HAS_AIXCC = False
 
 _l = logging.getLogger(__name__)
 
+
 class Program:
     def __init__(
         self,
         source_root: Path,
-        function_resolver = None,
+        function_resolver=None,
         crashing_inputs: list[ProgramInput] | None = None,
         language=None,
         should_init_resolver: bool = False,
@@ -34,7 +39,9 @@ class Program:
         self.language = language
         self._crashing_inputs = crashing_inputs or []
         self._should_init_resolver = should_init_resolver
-        self.function_resolver = function_resolver if self._should_init_resolver else None
+        self.function_resolver = (
+            function_resolver if self._should_init_resolver else None
+        )
         # save the args to recreate the function resolver later (if needed for pickling)
         if HAS_AIXCC:
             if isinstance(function_resolver, RemoteFunctionResolver):
@@ -50,7 +57,11 @@ class Program:
                 )
                 self._saved_resolver_cls = LocalFunctionResolver
 
-        self._git_repo = git.Repo(str(self.source_root)) if (self.source_root / ".git").exists() else None
+        self._git_repo = (
+            git.Repo(str(self.source_root))
+            if (self.source_root / ".git").exists()
+            else None
+        )
         self._versioned_code = {}
         self._latest_code = None
         self.crashing_function: typing.Optional[str] = None
@@ -66,8 +77,7 @@ class Program:
         temp_dir = Path(tempfile.mkdtemp())
         shutil.copytree(self.source_root, temp_dir, dirs_exist_ok=True)
         return Program(
-            temp_dir, crashing_inputs=self._crashing_inputs,
-            language=self.language
+            temp_dir, crashing_inputs=self._crashing_inputs, language=self.language
         )
 
     def cleanup(self):
@@ -78,7 +88,6 @@ class Program:
             shutil.rmtree(self.source_root)
         if self._git_repo is not None:
             self._git_repo.close()
-
 
     def setup_program(self):
         pass
@@ -169,7 +178,9 @@ class Program:
         for patched_func in patched_funcs:
             grouped_funcs[patched_func.file].append(patched_func)
         for patched_file in grouped_funcs:
-            new_code = self.file_patch_to_new_file(grouped_funcs[patched_file], lang=self.language)
+            new_code = self.file_patch_to_new_file(
+                grouped_funcs[patched_file], lang=self.language
+            )
             with open(patched_file, "w") as f:
                 f.write(new_code)
 
@@ -183,7 +194,9 @@ class Program:
 
         return patch.diff
 
-    def update_pois_for_src_path(self, poi_clusters: list[PoICluster]) -> list[PoICluster]:
+    def update_pois_for_src_path(
+        self, poi_clusters: list[PoICluster]
+    ) -> list[PoICluster]:
         new_clusters = []
         for cluster in poi_clusters:
             updated_pois = []
@@ -241,7 +254,11 @@ class Program:
             line_offset += new_lines_count - old_lines_count
 
             # Apply the replacement to the old_code_lines
-            old_code_lines = old_code_lines[:adjusted_start - 1] + new_code + old_code_lines[adjusted_end:]
+            old_code_lines = (
+                old_code_lines[: adjusted_start - 1]
+                + new_code
+                + old_code_lines[adjusted_end:]
+            )
 
         # Return the modified code as a string
         return "\n".join(old_code_lines)
@@ -250,7 +267,9 @@ class Program:
     def load_inputs_from_dir(input_dir: Path):
         inputs = []
         for input_file in input_dir.iterdir():
-            inputs.append(ProgramInput(input_file.absolute().read_bytes(), ProgramInputType.FILE))
+            inputs.append(
+                ProgramInput(input_file.absolute().read_bytes(), ProgramInputType.FILE)
+            )
 
         return inputs
 
@@ -258,7 +277,13 @@ class Program:
     # Compilation & Building
     #
 
-    def compile(self, patch: typing.Optional["Patch"] = None, edited_in_place=False, flags=None, **kwargs) -> tuple[bool, str]:
+    def compile(
+        self,
+        patch: typing.Optional["Patch"] = None,
+        edited_in_place=False,
+        flags=None,
+        **kwargs,
+    ) -> tuple[bool, str]:
         git_diff = None
         source_path = str(Path(self.source_root).resolve().absolute())
         if patch is None:
@@ -278,13 +303,17 @@ class Program:
             git_diff = self.git_diff(patch)
 
         if git_diff is None:
-            raise ValueError("Failed to create diff in a scenario where we either had no Patch or no edits")
+            raise ValueError(
+                "Failed to create diff in a scenario where we either had no Patch or no edits"
+            )
 
         with tempfile.NamedTemporaryFile(delete=False) as f:
             f.write(git_diff.encode())
             f.seek(0)
             patch_path = Path(f.name)
-            compile_res = self._compile_core(patch_path=patch_path, patch_obj=patch, flags=flags, **kwargs)
+            compile_res = self._compile_core(
+                patch_path=patch_path, patch_obj=patch, flags=flags, **kwargs
+            )
 
         return compile_res
 
@@ -301,28 +330,38 @@ class Program:
     # Execution
     #
 
-    def _check_functionality_core(self, **kwargs) -> tuple[ProgramExitType, typing.Optional[str]]:
+    def _check_functionality_core(
+        self, **kwargs
+    ) -> tuple[ProgramExitType, typing.Optional[str]]:
         raise NotImplementedError("Subclasses must implement this method.")
 
-    def check_functionality(self, patch: typing.Optional["Patch"] = None, **kwargs) -> tuple[ProgramExitType, typing.Optional[str]]:
+    def check_functionality(
+        self, patch: typing.Optional["Patch"] = None, **kwargs
+    ) -> tuple[ProgramExitType, typing.Optional[str]]:
         # we need to make the patch in an acceptable form
         git_diff = self.git_diff(patch) if patch is not None else None
         if patch is not None and git_diff is None:
-            raise ValueError("Failed to create diff in a scenario where we either had no Patch or no edits")
+            raise ValueError(
+                "Failed to create diff in a scenario where we either had no Patch or no edits"
+            )
 
         if git_diff:
             with tempfile.NamedTemporaryFile(delete=False) as f:
                 f.write(git_diff.encode())
                 f.seek(0)
                 patch_path = Path(f.name)
-                return self._check_functionality_core(patch_path=patch_path, patch_obj=patch, **kwargs)
+                return self._check_functionality_core(
+                    patch_path=patch_path, patch_obj=patch, **kwargs
+                )
         else:
             return self._check_functionality_core(**kwargs)
 
     def execute(self, prog_input: ProgramInput):
         raise NotImplementedError
 
-    def generates_alerts(self, prog_input: ProgramInput) -> Tuple[ProgramExitType, str | None, list]:
+    def generates_alerts(
+        self, prog_input: ProgramInput
+    ) -> Tuple[ProgramExitType, str | None, list]:
         raise NotImplementedError
 
     def triggers_alert(self, prog_input: ProgramInput) -> bool:

@@ -10,7 +10,7 @@ from patchery.data import Patch
 from patchery.deduplicator import PatchDeduplicator
 from patchery.data import Program
 
-from shellphish_crs_utils.models.patch import PatchRankings
+from patchery.data.models.patch import PatchRankings
 
 _l = logging.getLogger(__name__)
 
@@ -51,7 +51,9 @@ class PatchRanker:
         if still_crashing_percent:
             self.still_crashing_percent.update(still_crashing_percent)
 
-        self._rank_output_dir = Path(rank_output_dir) if rank_output_dir is not None else None
+        self._rank_output_dir = (
+            Path(rank_output_dir) if rank_output_dir is not None else None
+        )
 
         # output of the ranking
         self.scored_patches = {}
@@ -71,13 +73,20 @@ class PatchRanker:
         for patch in self._patches:
             self.scored_patches[patch] = self.score_patch_badness(patch)
 
-        self.ranked_patches = sorted(self.scored_patches, key=lambda x: self.scored_patches[x])
+        self.ranked_patches = sorted(
+            self.scored_patches, key=lambda x: self.scored_patches[x]
+        )
         timestamp = int(time.time_ns())
         output_yaml_data = {
             "ranks": [str(Path(p.file_path).stem) for p in self.ranked_patches],
-            "patch_info": {str(Path(p.file_path).stem): self.scored_patches[p] for p in self.ranked_patches},
+            "patch_info": {
+                str(Path(p.file_path).stem): self.scored_patches[p]
+                for p in self.ranked_patches
+            },
             "timestamp": timestamp,
-            "poi_report_ids": list(set(p.metadata["poi_report_id"] for p in self._patches)),
+            "poi_report_ids": list(
+                set(p.metadata["poi_report_id"] for p in self._patches)
+            ),
         }
         return output_yaml_data
 
@@ -106,10 +115,12 @@ class PatchRanker:
         # than this is actually an invalid patch, which gets a penalty score that is HUGE
         # TODO: make this generic again after submission
         #   right now we assume everything in this is a crashing input on the patched binay
-        #prev_still_crashing_inputs = self._prev_crash_inputs[patch]
+        # prev_still_crashing_inputs = self._prev_crash_inputs[patch]
         still_crashing_percent = self.still_crashing_percent[patch]
         if still_crashing_percent > 0:
-            _l.warning(f"Patch {patch.file_path.name} is likely invalid because old crashes still crashes the patched binary!")
+            _l.warning(
+                f"Patch {patch.file_path.name} is likely invalid because old crashes still crashes the patched binary!"
+            )
             final_score += self.INVALID_PATCH_PENALTY * still_crashing_percent
             self.invalidated_patches.add(patch)
 
@@ -149,12 +160,22 @@ class PatchRanker:
         """
         if not patches_dir.exists():
             patches_dir.mkdir(parents=True)
-            _l.warning(f"Created patches directory {patches_dir} because it did not exist before!")
+            _l.warning(
+                f"Created patches directory {patches_dir} because it did not exist before!"
+            )
 
         # normalize paths
         patches_dir = Path(patches_dir).absolute()
-        patch_metadatas_dir = Path(patch_metadatas_dir).absolute() if patch_metadatas_dir is not None else None
-        previous_crashes_dir = Path(previous_crashes_dir).absolute() if previous_crashes_dir is not None else None
+        patch_metadatas_dir = (
+            Path(patch_metadatas_dir).absolute()
+            if patch_metadatas_dir is not None
+            else None
+        )
+        previous_crashes_dir = (
+            Path(previous_crashes_dir).absolute()
+            if previous_crashes_dir is not None
+            else None
+        )
 
         patch_crash_percent = {}
         for patch_metadata_file in patch_metadatas_dir.iterdir():
@@ -166,7 +187,9 @@ class PatchRanker:
             try:
                 metadata = yaml.safe_load(patch_metadata_file.read_text())
             except Exception as e:
-                _l.error(f"Error loading metadata file {patch_metadata_file}: {e}, skipped for ranking!")
+                _l.error(
+                    f"Error loading metadata file {patch_metadata_file}: {e}, skipped for ranking!"
+                )
                 continue
 
             patch = Patch.from_git_diff(patch_file, metadata=metadata)
@@ -178,7 +201,9 @@ class PatchRanker:
         patch_buckets = deduplicator.deduplicate()
         output = {"buckets": [], "timestamp": None}
         for bucket in patch_buckets:
-            crash_perc_by_patch = {patch: patch_crash_percent[patch] for patch in bucket}
+            crash_perc_by_patch = {
+                patch: patch_crash_percent[patch] for patch in bucket
+            }
             ranker: PatchRanker = cls(
                 bucket,
                 continuous=continuous,
@@ -195,11 +220,18 @@ class PatchRanker:
             timestamp = int(time.time_ns())
             output["timestamp"] = timestamp
             parsed_model = PatchRankings.model_validate(output)
-            output_file = rank_output_dir / f"{PatchRanker.RANK_FILE_PREFIX}{timestamp}.yaml"
+            output_file = (
+                rank_output_dir / f"{PatchRanker.RANK_FILE_PREFIX}{timestamp}.yaml"
+            )
 
             # now dump the parsed model to a yaml file
             with open(output_file, "w") as fp:
-                yaml.safe_dump(parsed_model.model_dump(), fp, default_flow_style=False, sort_keys=False)
+                yaml.safe_dump(
+                    parsed_model.model_dump(),
+                    fp,
+                    default_flow_style=False,
+                    sort_keys=False,
+                )
 
             _l.info(f"Ranking output written to {output_file}")
 

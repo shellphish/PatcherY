@@ -16,7 +16,7 @@ requires-python = ">= 3.10"
 dependencies = [
     "tqdm",
     "pyyaml",
-    "gitpython",
+    "GitPython",
     "tree-sitter==0.21.3",
     "tree-sitter-languages",
     "PyYAML",
@@ -24,11 +24,16 @@ dependencies = [
     "jinja2",
     'py-tlsh',
     'openai',
+    "langchain>=1.0.0a7",
     'requests',
     'unidiff',
     'numpy',
-    'litellm==1.63.14'
+    "pre-commit",
+    "pydantic",
+    'jq',
+    "ruff"
 ]
+
 dynamic = ["version"]
 
 [project.readme]
@@ -58,3 +63,24 @@ find = {namespaces = false}
 
 [tool.setuptools.dynamic]
 version = {attr = "patchery.__version__"}
+
+[tool.ruff]
+target-version = "py310"
+
+[tool.ruff.lint]
+# Enable basic rule sets
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # isort (import sorting),
+    "UP",  # Pyupgrade
+    "D",   # Pydocstyle
+]
+# Ignore specific rules
+ignore = [
+    "E501",  # line too long (let formatter handle it)
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Allow unused imports in __init__.py files
+"__init__.py" = ["F401"]

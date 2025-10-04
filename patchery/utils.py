@@ -17,7 +17,7 @@ if typing.TYPE_CHECKING:
 
 _l = logging.getLogger(__name__)
 
-MULTITHREAD_LOG_FOLDER_BASE = '/tmp/patchery/thread_logs'
+MULTITHREAD_LOG_FOLDER_BASE = "/tmp/patchery/thread_logs"
 
 
 class WorkDirContext:
@@ -56,8 +56,8 @@ def read_src_from_file(src_file, start_line, end_line, backup_code=None):
 
     with open(src_file, "r") as f:
         lines = f.readlines()
-    
-    return "".join(lines[start_line-1:end_line])
+
+    return "".join(lines[start_line - 1 : end_line])
 
 
 def find_src_root_from_commit(target_root: Path, commit: str) -> Optional[Path]:
@@ -87,6 +87,7 @@ def find_src_root_from_commit(target_root: Path, commit: str) -> Optional[Path]:
 #
 # Hashing
 #
+
 
 def md5_hash(bstring: bytes) -> str:
     hasher = hashlib.md5()
@@ -144,7 +145,7 @@ def absolute_path_finder(src_root: Path, relative_file_path: Path) -> Path | Non
         if full_path.exists():
             _l.critical(
                 f"Found the file by hacking the path: %s! Clang Indexer likely failed earlier!",
-                relative_file_path
+                relative_file_path,
             )
             return full_path
 
@@ -166,41 +167,82 @@ LLM_MAPPING = {
     "claude-3.7-sonnet": "claude-3.7-sonnet",
     "o3-mini": "o3-mini",
     "oai-gpt-o3-mini": "o3-mini",
-    'o4-mini': 'o4-mini',
-    'oai-gpt-o4-mini': 'o4-mini',
-    'o3': 'o3',
-    'oai-gpt-o3': 'o3',
-    'gpt-4.1': 'gpt-4.1',
-    'claude-4-sonnet': 'claude-4-sonnet',
+    "o4-mini": "o4-mini",
+    "oai-gpt-o4-mini": "o4-mini",
+    "o3": "o3",
+    "oai-gpt-o3": "o3",
+    "gpt-4.1": "gpt-4.1",
+    "claude-4-sonnet": "claude-4-sonnet",
 }
 
 
-def llm_model_name(model: str = "", agentlib = False) -> str:
+def llm_model_name(model: str = "", agentlib=False) -> str:
     if model.strip() == "":
         model = os.getenv("LLM_MODEL_NAME", "claude-3.7-sonnet")
         return LLM_MAPPING.get(model)
     if model not in LLM_MAPPING.keys():
-        raise ValueError(f"Invalid LLM model name: {model}, you should use one of {LLM_MAPPING.keys()}")
+        raise ValueError(
+            f"Invalid LLM model name: {model}, you should use one of {LLM_MAPPING.keys()}"
+        )
     if agentlib:
         return model
     return LLM_MAPPING.get(model)
 
 
-def llm_cost(model_name: str, prompt_tokens: int, completion_tokens: int, cached_prompt_tokens: int = 0):
+def llm_cost(
+    model_name: str,
+    prompt_tokens: int,
+    completion_tokens: int,
+    cached_prompt_tokens: int = 0,
+):
     # these are the $x per Million tokens
     cost = {
         "oai-gpt-4-turbo": {"prompt_price": 10, "completion_price": 30},
         "oai-gpt-4": {"prompt_price": 30, "completion_price": 60},
-        "oai-gpt-4o": {"prompt_price": 2.5, "cached_prompt_price": 1.25, "completion_price": 10},
-        "oai-gpt-o1-preview": {"prompt_price": 15, "cached_prompt_price": 7.5, "completion_price": 60},
-        "oai-gpt-o3-mini": {"prompt_price": 1.1, "cached_prompt_price": 0.55, "completion_price": 4.4},
+        "oai-gpt-4o": {
+            "prompt_price": 2.5,
+            "cached_prompt_price": 1.25,
+            "completion_price": 10,
+        },
+        "oai-gpt-o1-preview": {
+            "prompt_price": 15,
+            "cached_prompt_price": 7.5,
+            "completion_price": 60,
+        },
+        "oai-gpt-o3-mini": {
+            "prompt_price": 1.1,
+            "cached_prompt_price": 0.55,
+            "completion_price": 4.4,
+        },
         "claude-3-5-sonnet-20241022": {"prompt_price": 3, "completion_price": 15},
         "claude-3-7-sonnet-20250219": {"prompt_price": 3, "completion_price": 15},
     }
-    llm_price = cost.get(model_name, cost.get(f'oai-{model_name}'))
-    prompt_price = ( (prompt_tokens - cached_prompt_tokens) / 1000000) * llm_price["prompt_price"]
+    llm_price = cost.get(model_name, cost.get(f"oai-{model_name}"))
+    prompt_price = ((prompt_tokens - cached_prompt_tokens) / 1000000) * llm_price[
+        "prompt_price"
+    ]
     completion_price = (completion_tokens / 1000000) * llm_price["completion_price"]
-    cached_prompt_price = (cached_prompt_tokens / 1000000) * llm_price.get("cached_prompt_price", 0)
+    cached_prompt_price = (cached_prompt_tokens / 1000000) * llm_price.get(
+        "cached_prompt_price", 0
+    )
     cost = round(prompt_price + completion_price + cached_prompt_price, 5)
 
     return cost
+
+
+def is_true_value(value):
+    if value is None:
+        return False
+
+    elif value.lower() in ["true", "1", "yes", "y"]:
+        return True
+
+    elif value.lower() in ["false", "0", "no", "n"]:
+        return False
+
+    else:
+        raise ValueError(f"Invalid value for boolean conversion: {value}")
+
+
+def artiphishell_should_fail_on_error():
+    return is_true_value(os.environ.get("ARTIPHISHELL_FAIL_EARLY", None))
