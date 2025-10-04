@@ -4,15 +4,22 @@ import logging
 from pathlib import Path
 
 import yaml
-from shellphish_crs_utils.models.crs_reports import KumushiRootCauseReport, KumushiPOICluster, KumushiPOI, KumushiCodeFunction
+from patchery.data.models.crs_reports import (
+    KumushiRootCauseReport,
+    KumushiPOICluster,
+    KumushiPOI,
+    KumushiCodeFunction,
+)
 
 from patchery.kumushi.code_parsing import CodeFunction
 from patchery.data import PoI, PoICluster, PoISource, Program
-_l = (logging.getLogger(__name__))
+
+_l = logging.getLogger(__name__)
 TMP_POI_DIR = Path("/tmp/kumushi_poi")
 
+
 class timeout:
-    def __init__(self, seconds=1, error_message='Timeout'):
+    def __init__(self, seconds=1, error_message="Timeout"):
         self.seconds = seconds
         self.error_message = error_message
 
@@ -68,7 +75,7 @@ def absolute_path_finder(src_root: Path, relative_file_path: Path) -> Path | Non
         if full_path.exists():
             _l.critical(
                 f"Found the file by hacking the path: %s! Clang Indexer likely failed earlier!",
-                relative_file_path
+                relative_file_path,
             )
             return full_path
 
@@ -85,7 +92,7 @@ def read_src_from_file(src_file, start_line, end_line, backup_code=None):
     with open(src_file, "r") as f:
         lines = f.readlines()
 
-    return "".join(lines[start_line - 1:end_line])
+    return "".join(lines[start_line - 1 : end_line])
 
 
 class WorkDirContext:
@@ -106,14 +113,18 @@ def convert_poi_to_kumushi_poi(poi: PoI) -> KumushiPOI:
     kumushi_function = KumushiCodeFunction.model_validate(poi.function.to_dict())
     # Create KumushiPOI
     return KumushiPOI(
-        sources=poi.sources if poi.sources else [PoISource.UNKNOWN],  # You might want to adjust this default
+        sources=poi.sources
+        if poi.sources
+        else [PoISource.UNKNOWN],  # You might want to adjust this default
         crash_line_number=poi.crash_line_num,
         crash_line=poi.crash_line,
-        code_function=kumushi_function
+        code_function=kumushi_function,
     )
 
 
-def convert_poi_clusters_to_kumushi_report(poi_clusters: list[PoICluster], rca_hash: str) -> KumushiRootCauseReport:
+def convert_poi_clusters_to_kumushi_report(
+    poi_clusters: list[PoICluster], rca_hash: str
+) -> KumushiRootCauseReport:
     # Convert each PoICluster to KumushiPOICluster
     kumushi_clusters = []
 
@@ -123,8 +134,7 @@ def convert_poi_clusters_to_kumushi_report(poi_clusters: list[PoICluster], rca_h
 
         # Create KumushiPOICluster
         kumushi_cluster = KumushiPOICluster(
-            poi_cluster=kumushi_pois,
-            reasoning=cluster.reasoning
+            poi_cluster=kumushi_pois, reasoning=cluster.reasoning
         )
 
         kumushi_clusters.append(kumushi_cluster)
@@ -144,18 +154,22 @@ def convert_kumushi_poi_to_poi(kumushi_poi: KumushiPOI) -> PoI:
         file_path=kumushi_poi.code_function.file_path,
         code=kumushi_poi.code_function.code,
         global_vars=kumushi_poi.code_function.global_vars,
-        version=kumushi_poi.code_function.version
+        version=kumushi_poi.code_function.version,
     )
     # Create PoI
     return PoI(
-        sources=kumushi_poi.sources if kumushi_poi.sources else [PoISource.UNKNOWN],  # You might want to adjust this default
+        sources=kumushi_poi.sources
+        if kumushi_poi.sources
+        else [PoISource.UNKNOWN],  # You might want to adjust this default
         crash_line_num=kumushi_poi.crash_line_number,
         crash_line=kumushi_poi.crash_line,
-        function=function
+        function=function,
     )
 
 
-def convert_kumushi_report_to_poi_clusters(kumushi_report: KumushiRootCauseReport) -> list[PoICluster]:
+def convert_kumushi_report_to_poi_clusters(
+    kumushi_report: KumushiRootCauseReport,
+) -> list[PoICluster]:
     poi_clusters = []
 
     for kumushi_cluster in kumushi_report.poi_clusters:
@@ -165,19 +179,28 @@ def convert_kumushi_report_to_poi_clusters(kumushi_report: KumushiRootCauseRepor
     return poi_clusters
 
 
-def save_clusters_to_yaml(poi_clusters: list[PoICluster], output_file: Path, rca_hash: str, program: Program):
+def save_clusters_to_yaml(
+    poi_clusters: list[PoICluster], output_file: Path, rca_hash: str, program: Program
+):
     # update pois to be source relative
     new_clusters = []
     for cluster in poi_clusters:
         new_pois = []
         for poi in cluster.pois:
             try:
-                poi.function.file_path = poi.function.file_path.relative_to(program.source_root)
+                poi.function.file_path = poi.function.file_path.relative_to(
+                    program.source_root
+                )
             except Exception as e:
-                _l.warning("Failed to make the path relative to the source root:", exc_info=True)
+                _l.warning(
+                    "Failed to make the path relative to the source root:",
+                    exc_info=True,
+                )
 
             new_pois.append(poi)
-        new_clusters.append(PoICluster(new_pois, reasoning=cluster.reasoning, source=cluster.source))
+        new_clusters.append(
+            PoICluster(new_pois, reasoning=cluster.reasoning, source=cluster.source)
+        )
 
     # Convert to Kumushi format
     kumushi_report = convert_poi_clusters_to_kumushi_report(new_clusters, rca_hash)
@@ -186,15 +209,17 @@ def save_clusters_to_yaml(poi_clusters: list[PoICluster], output_file: Path, rca
     report_dict = kumushi_report.model_dump()
 
     # Save to YAML
-    with open(output_file, 'w') as f:
+    with open(output_file, "w") as f:
         yaml.safe_dump(report_dict, f, default_flow_style=False, sort_keys=False)
 
 
 def load_clusters_from_yaml(yaml_path: Path, program: Program) -> list[PoICluster]:
-    with open(yaml_path, 'r') as f:
+    with open(yaml_path, "r") as f:
         report_dict = yaml.safe_load(f)
 
-    kumushi_report: KumushiRootCauseReport = KumushiRootCauseReport.model_validate(report_dict)
+    kumushi_report: KumushiRootCauseReport = KumushiRootCauseReport.model_validate(
+        report_dict
+    )
     poi_clusters = convert_kumushi_report_to_poi_clusters(kumushi_report)
 
     # update pois to be source relative
@@ -204,9 +229,12 @@ def load_clusters_from_yaml(yaml_path: Path, program: Program) -> list[PoICluste
         for poi in cluster.pois:
             poi.function.file_path = program.source_root / poi.function.file_path
             new_pois.append(poi)
-        new_clusters.append(PoICluster(new_pois, reasoning=cluster.reasoning, source=cluster.source))
+        new_clusters.append(
+            PoICluster(new_pois, reasoning=cluster.reasoning, source=cluster.source)
+        )
 
     return new_clusters
+
 
 def save_clusters_to_file(clusters: list["PoICluster"], file_path: Path) -> None:
     """
@@ -232,6 +260,7 @@ def save_clusters_to_file(clusters: list["PoICluster"], file_path: Path) -> None
     except OSError as e:
         raise OSError(f"Failed to save list of PoIClusters to {file_path}: {str(e)}")
 
+
 def load_clusters_from_file(file_path: Path) -> list["PoICluster"]:
     """
     Load a list of PoICluster instances from a pickle file.
@@ -256,7 +285,9 @@ def load_clusters_from_file(file_path: Path) -> list["PoICluster"]:
         with open(file_path, "rb") as f:
             clusters = pickle.load(f)
             if not isinstance(clusters, list):
-                raise pickle.UnpicklingError(f"Expected a list of PoICluster objects, got {type(clusters)}")
+                raise pickle.UnpicklingError(
+                    f"Expected a list of PoICluster objects, got {type(clusters)}"
+                )
             return clusters
     except OSError as e:
         _l.info(f"Failed to load PoIClusters from {file_path}: {str(e)}")

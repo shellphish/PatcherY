@@ -7,25 +7,37 @@ from typing import Optional, List
 
 import yaml
 
-from shellphish_crs_utils.models.crs_reports import RepresentativeFullPoVReport, POIReport
-from shellphish_crs_utils.models.patch import PatchMetaData
-from shellphish_crs_utils.oss_fuzz.project import OSSFuzzProject
+from patchery.data.models.crs_reports import RepresentativeFullPoVReport, POIReport
+from patchery.data.models.patch import PatchMetaData
+# from shellphish_crs_utils.oss_fuzz.project import OSSFuzzProject
 
 import patchery
 from patchery import Patcher, LLMPatchGenerator
-from patchery.utils import absolute_path_finder, read_src_from_file, find_src_root_from_commit, llm_model_name
+from patchery.utils import (
+    absolute_path_finder,
+    read_src_from_file,
+    find_src_root_from_commit,
+    llm_model_name,
+)
 
 from patchery.kumushi.root_cause_analyzer import RootCauseAnalyzer
 from patchery.kumushi.rca_mode import RCAMode
 from patchery.kumushi.aixcc import AICCProgram
-from patchery.data import ProgramInput, ProgramInputType, PoI, PoICluster, PoISource, Program
+from patchery.data import (
+    ProgramInput,
+    ProgramInputType,
+    PoI,
+    PoICluster,
+    PoISource,
+    Program,
+)
 from patchery.kumushi.util import load_clusters_from_yaml
 
 _l = logging.getLogger(__name__)
 
 
 class AICCPatcher(Patcher):
-    DEFAULT_LLM_MODEL = 'claude-3.7-sonnet'
+    DEFAULT_LLM_MODEL = "claude-3.7-sonnet"
 
     def __init__(
         self,
@@ -35,9 +47,8 @@ class AICCPatcher(Patcher):
         patch_metadata_output_dir=None,
         local_run: bool = False,
         kumushi_clusters: list | None = None,
-        **kwargs
+        **kwargs,
     ):
-
         # private api
         self._patch_output_dir = patch_output_dir
         self._patch_metadata_output_dir = patch_metadata_output_dir
@@ -48,7 +59,9 @@ class AICCPatcher(Patcher):
         self.is_local_run = local_run
         self.pois = []
 
-        super().__init__(program, llm_model_name(model=self.DEFAULT_LLM_MODEL), **kwargs)
+        super().__init__(
+            program, llm_model_name(model=self.DEFAULT_LLM_MODEL), **kwargs
+        )
 
         # generate pois for patching
         self.pois = self.poi_clusters_from_kumushi()
@@ -60,13 +73,15 @@ class AICCPatcher(Patcher):
 
     def poi_clusters_from_kumushi(self, kumushi_report=None):
         if not self._kumushi_clusters:
-            _l.info("No KumuShi report provided, generating PoIs from local KumuShi run...")
-            rca = RootCauseAnalyzer(
-                self.program_info,
-                rca_mode=RCAMode.WEIGHTLESS
+            _l.info(
+                "No KumuShi report provided, generating PoIs from local KumuShi run..."
             )
+            rca = RootCauseAnalyzer(self.program_info, rca_mode=RCAMode.WEIGHTLESS)
             poi_clusters = rca.weightless_pois
-            _l.info(f"Since we are using KumuShi in weightless, we will limit attempts to only %d.", self._weightless_limited_attempts)
+            _l.info(
+                f"Since we are using KumuShi in weightless, we will limit attempts to only %d.",
+                self._weightless_limited_attempts,
+            )
             self.max_attempts = self._weightless_limited_attempts
             self.program_info.code.reinit_or_get_function_resolver()
         else:
@@ -79,8 +94,14 @@ class AICCPatcher(Patcher):
     def _update_patch_output_locations(self) -> tuple[Path, Path]:
         # patch output location
         patch_name = hashlib.md5(os.urandom(16)).hexdigest()
-        patch_output_dir = Path(self._patch_output_dir) if self._patch_output_dir else None
-        patch_metadata_output_dir = Path(self._patch_metadata_output_dir) if self._patch_metadata_output_dir else None
+        patch_output_dir = (
+            Path(self._patch_output_dir) if self._patch_output_dir else None
+        )
+        patch_metadata_output_dir = (
+            Path(self._patch_metadata_output_dir)
+            if self._patch_metadata_output_dir
+            else None
+        )
         assert patch_output_dir.exists()
         assert patch_metadata_output_dir.exists()
         return patch_output_dir / patch_name, patch_metadata_output_dir / patch_name
@@ -93,62 +114,76 @@ class AICCPatcher(Patcher):
         verified_patches = super().generate_verified_patches(self.pois, **kwargs)
         if verified_patches:
             for patch_group in verified_patches:
-                for patch in patch_group['patches']:
+                for patch in patch_group["patches"]:
                     patch_diff = self.program_info.git_diff(patch)
-                    patch_output_file, patch_metadata_output_file = self._update_patch_output_locations()
-                    build_request = patch.metadata.get('build_request_id', None)
-                    summary = patch.metadata.get('summary', None)
+                    patch_output_file, patch_metadata_output_file = (
+                        self._update_patch_output_locations()
+                    )
+                    build_request = patch.metadata.get("build_request_id", None)
+                    summary = patch.metadata.get("summary", None)
                     if build_request is None:
-                        _l.critical("No build request ID found in patch metadata, using crash report ID instead.")
+                        _l.critical(
+                            "No build request ID found in patch metadata, using crash report ID instead."
+                        )
 
                     with open(patch_metadata_output_file, "w") as f:
                         patch_metadata: PatchMetaData = PatchMetaData(
                             patcher_name=patcher_name,
-                            total_cost=patch_group['cost'],
+                            total_cost=patch_group["cost"],
                             poi_report_id=self.program_info.poi_report.crash_report_id,
                             pdt_project_id=self.program_info.poi_report.project_id,
                             pdt_project_name=self.program_info.poi_report.project_name,
                             pdt_harness_info_id=self.program_info.poi_report.harness_info_id,
                             build_request_id=build_request,
                         )
-                        yaml.safe_dump(patch_metadata.model_dump(), f, default_flow_style=False, sort_keys=False)
+                        yaml.safe_dump(
+                            patch_metadata.model_dump(),
+                            f,
+                            default_flow_style=False,
+                            sort_keys=False,
+                        )
                     with open(patch_output_file, "w") as f:
                         f.write(patch_diff)
 
-                    _l.info(f'Patch data saved! Patch: %s | Metadata: %s', patch_output_file, patch_metadata_output_file)
+                    _l.info(
+                        f"Patch data saved! Patch: %s | Metadata: %s",
+                        patch_output_file,
+                        patch_metadata_output_file,
+                    )
             _l.info(f"💸 The total cost of this patch was {self.total_cost} dollars.")
         else:
-            _l.info(f"💸 We could not make a patch. The total cost was {self.total_cost} dollars.")
+            _l.info(
+                f"💸 We could not make a patch. The total cost was {self.total_cost} dollars."
+            )
             _l.error("Failed to generate any verified patches.")
         return verified_patches
 
     @classmethod
     def from_files(
-            cls,
-            *args,
-            target_root: Path = None,
-            source_root: Path = None,
-            report_yaml_path: Path = None,
-            project_metadata_path=None,
-            raw_report_path=None,
-            function_json_dir=None,
-            function_indices=None,
-            alerting_inputs_path=None,
-            patch_output_dir=None,
-            patch_metadata_output_dir=None,
-            crashing_commit=None,
-            indices_by_commit=None,
-            changed_func_by_commit=None,
-            patch_planning=None,
-            local_run=False,
-            kumushi_report_path=None,
-            delta_mode=False,
-            coverage_build_project_path: Path=None,
-            patch_request_meta: Path = None,
-            bypassing_inputs: str = None,
-            **kwargs
+        cls,
+        *args,
+        target_root: Path = None,
+        source_root: Path = None,
+        report_yaml_path: Path = None,
+        project_metadata_path=None,
+        raw_report_path=None,
+        function_json_dir=None,
+        function_indices=None,
+        alerting_inputs_path=None,
+        patch_output_dir=None,
+        patch_metadata_output_dir=None,
+        crashing_commit=None,
+        indices_by_commit=None,
+        changed_func_by_commit=None,
+        patch_planning=None,
+        local_run=False,
+        kumushi_report_path=None,
+        delta_mode=False,
+        coverage_build_project_path: Path = None,
+        patch_request_meta: Path = None,
+        bypassing_inputs: str = None,
+        **kwargs,
     ) -> "AICCPatcher":
-
         # validate outputs locations exists
         if patch_output_dir is not None:
             Path(patch_output_dir).mkdir(exist_ok=True)
@@ -178,17 +213,17 @@ class AICCPatcher(Patcher):
                 with raw_report_path.open("r") as f:
                     rep = yaml.safe_load(f)
 
-                    #rep["dedup_crash_report"]["dedup_tokens_shellphish"] = {}
-                    #rep["run_pov_result"]["pov"]["organizer_crash_eval"] = {}
-                    #rep["run_pov_result"]["pov"]["dedup_crash_report"]["dedup_tokens_shellphish"] = {}
-                    #rep["run_pov_result"]["pov"]["organizer_crash_eval"]["code_label"] = ""
-                    #rep["run_pov_result"]["pov"]["organizer_crash_eval"]["significance"] = 0
-                    #rep["run_pov_result"]["pov"]["organizer_crash_eval"]["significance_message"] = ""
-                    #rep["run_pov_result"]["pov"]["organizer_crash_eval"]["crash_state"] = ""
-                    #rep["run_pov_result"]["pov"]["dedup_crash_report"]["dedup_tokens_shellphish"]["code_label"] = ""
-                    #rep["run_pov_result"]["pov"]["dedup_crash_report"]["dedup_tokens_shellphish"]["significance"] = ""
-                    #rep["run_pov_result"]["pov"]["dedup_crash_report"]["dedup_tokens_shellphish"]["significance_message"] = ""
-                    #rep["run_pov_result"]["pov"]["dedup_crash_report"]["dedup_tokens_shellphish"]["crash_state"] = ""
+                    # rep["dedup_crash_report"]["dedup_tokens_shellphish"] = {}
+                    # rep["run_pov_result"]["pov"]["organizer_crash_eval"] = {}
+                    # rep["run_pov_result"]["pov"]["dedup_crash_report"]["dedup_tokens_shellphish"] = {}
+                    # rep["run_pov_result"]["pov"]["organizer_crash_eval"]["code_label"] = ""
+                    # rep["run_pov_result"]["pov"]["organizer_crash_eval"]["significance"] = 0
+                    # rep["run_pov_result"]["pov"]["organizer_crash_eval"]["significance_message"] = ""
+                    # rep["run_pov_result"]["pov"]["organizer_crash_eval"]["crash_state"] = ""
+                    # rep["run_pov_result"]["pov"]["dedup_crash_report"]["dedup_tokens_shellphish"]["code_label"] = ""
+                    # rep["run_pov_result"]["pov"]["dedup_crash_report"]["dedup_tokens_shellphish"]["significance"] = ""
+                    # rep["run_pov_result"]["pov"]["dedup_crash_report"]["dedup_tokens_shellphish"]["significance_message"] = ""
+                    # rep["run_pov_result"]["pov"]["dedup_crash_report"]["dedup_tokens_shellphish"]["crash_state"] = ""
 
                     pov_report = RepresentativeFullPoVReport.model_validate(rep)
 
@@ -224,7 +259,9 @@ class AICCPatcher(Patcher):
         if kumushi_report_path:
             kumushi_report_path = Path(kumushi_report_path)
             if kumushi_report_path.exists() and kumushi_report_path.is_file():
-                kumushi_clusters = load_clusters_from_yaml(kumushi_report_path, aicc_program)
+                kumushi_clusters = load_clusters_from_yaml(
+                    kumushi_report_path, aicc_program
+                )
 
         patcher = cls(
             aicc_program,
