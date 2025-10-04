@@ -34,20 +34,20 @@ class timeout:
         signal.alarm(0)
 
 
-def _validate_or_correct_path(p) -> Path | None:
-    if isinstance(p, str):
-        if not p or p == "None":
-            new_p = None
-        else:
-            new_p = Path(p).absolute()
-    else:
-        new_p = p
+# def _validate_or_correct_path(p) -> Path | None:
+#     if isinstance(p, str):
+#         if not p or p == "None":
+#             new_p = None
+#         else:
+#             new_p = Path(p).absolute()
+#     else:
+#         new_p = p
 
-    if new_p is not None:
-        if not new_p.exists():
-            raise FileNotFoundError(f"Path {new_p} does not exist!")
+#     if new_p is not None:
+#         if not new_p.exists():
+#             raise FileNotFoundError(f"Path {new_p} does not exist!")
 
-    return new_p
+#     return new_p
 
 
 def absolute_path_finder(src_root: Path, relative_file_path: Path) -> Path | None:
@@ -113,18 +113,14 @@ def convert_poi_to_kumushi_poi(poi: PoI) -> KumushiPOI:
     kumushi_function = KumushiCodeFunction.model_validate(poi.function.to_dict())
     # Create KumushiPOI
     return KumushiPOI(
-        sources=poi.sources
-        if poi.sources
-        else [PoISource.UNKNOWN],  # You might want to adjust this default
+        sources=poi.sources if poi.sources else [PoISource.UNKNOWN],  # You might want to adjust this default
         crash_line_number=poi.crash_line_num,
         crash_line=poi.crash_line,
         code_function=kumushi_function,
     )
 
 
-def convert_poi_clusters_to_kumushi_report(
-    poi_clusters: list[PoICluster], rca_hash: str
-) -> KumushiRootCauseReport:
+def convert_poi_clusters_to_kumushi_report(poi_clusters: list[PoICluster], rca_hash: str) -> KumushiRootCauseReport:
     # Convert each PoICluster to KumushiPOICluster
     kumushi_clusters = []
 
@@ -133,9 +129,7 @@ def convert_poi_clusters_to_kumushi_report(
         kumushi_pois = [convert_poi_to_kumushi_poi(poi) for poi in cluster.pois]
 
         # Create KumushiPOICluster
-        kumushi_cluster = KumushiPOICluster(
-            poi_cluster=kumushi_pois, reasoning=cluster.reasoning
-        )
+        kumushi_cluster = KumushiPOICluster(poi_cluster=kumushi_pois, reasoning=cluster.reasoning)
 
         kumushi_clusters.append(kumushi_cluster)
 
@@ -179,18 +173,14 @@ def convert_kumushi_report_to_poi_clusters(
     return poi_clusters
 
 
-def save_clusters_to_yaml(
-    poi_clusters: list[PoICluster], output_file: Path, rca_hash: str, program: Program
-):
+def save_clusters_to_yaml(poi_clusters: list[PoICluster], output_file: Path, rca_hash: str, program: Program):
     # update pois to be source relative
     new_clusters = []
     for cluster in poi_clusters:
         new_pois = []
         for poi in cluster.pois:
             try:
-                poi.function.file_path = poi.function.file_path.relative_to(
-                    program.source_root
-                )
+                poi.function.file_path = poi.function.file_path.relative_to(program.source_root)
             except Exception as e:
                 _l.warning(
                     "Failed to make the path relative to the source root:",
@@ -198,9 +188,7 @@ def save_clusters_to_yaml(
                 )
 
             new_pois.append(poi)
-        new_clusters.append(
-            PoICluster(new_pois, reasoning=cluster.reasoning, source=cluster.source)
-        )
+        new_clusters.append(PoICluster(new_pois, reasoning=cluster.reasoning, source=cluster.source))
 
     # Convert to Kumushi format
     kumushi_report = convert_poi_clusters_to_kumushi_report(new_clusters, rca_hash)
@@ -217,9 +205,7 @@ def load_clusters_from_yaml(yaml_path: Path, program: Program) -> list[PoICluste
     with open(yaml_path, "r") as f:
         report_dict = yaml.safe_load(f)
 
-    kumushi_report: KumushiRootCauseReport = KumushiRootCauseReport.model_validate(
-        report_dict
-    )
+    kumushi_report: KumushiRootCauseReport = KumushiRootCauseReport.model_validate(report_dict)
     poi_clusters = convert_kumushi_report_to_poi_clusters(kumushi_report)
 
     # update pois to be source relative
@@ -229,9 +215,7 @@ def load_clusters_from_yaml(yaml_path: Path, program: Program) -> list[PoICluste
         for poi in cluster.pois:
             poi.function.file_path = program.source_root / poi.function.file_path
             new_pois.append(poi)
-        new_clusters.append(
-            PoICluster(new_pois, reasoning=cluster.reasoning, source=cluster.source)
-        )
+        new_clusters.append(PoICluster(new_pois, reasoning=cluster.reasoning, source=cluster.source))
 
     return new_clusters
 
@@ -285,9 +269,7 @@ def load_clusters_from_file(file_path: Path) -> list["PoICluster"]:
         with open(file_path, "rb") as f:
             clusters = pickle.load(f)
             if not isinstance(clusters, list):
-                raise pickle.UnpicklingError(
-                    f"Expected a list of PoICluster objects, got {type(clusters)}"
-                )
+                raise pickle.UnpicklingError(f"Expected a list of PoICluster objects, got {type(clusters)}")
             return clusters
     except OSError as e:
         _l.info(f"Failed to load PoIClusters from {file_path}: {str(e)}")
