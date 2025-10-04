@@ -5,11 +5,11 @@ import sys
 from pathlib import Path
 
 import patchery
-from patchery import Patcher
+from patchery.patcher import Patcher
 from patchery.ranker import PatchRanker
 from patchery.deduplicator import PatchDeduplicator
 
-INFO_ONLY=os.getenv("INFO_ONLY", False)
+INFO_ONLY = os.getenv("INFO_ONLY", False)
 
 _l = logging.getLogger("patchery")
 kumushi_logger = logging.getLogger("kumushi")
@@ -19,6 +19,7 @@ if not INFO_ONLY:
 else:
     _l.setLevel(logging.INFO)
     kumushi_logger.setLevel(logging.INFO)
+
 
 def main():
     """
@@ -38,7 +39,9 @@ def main():
         patchery --version
         """,
     )
-    parser.add_argument("--version", "-v", action="version", version=patchery.__version__)
+    parser.add_argument(
+        "--version", "-v", action="version", version=patchery.__version__
+    )
 
     #
     # Mode Selection
@@ -68,7 +71,7 @@ def main():
         --src-root, --poi-file, --poi-func, --poi-line, --run-script, --report-file, --raw-report
         """,
     )
-    
+
     parser.add_argument(
         "--local-run",
         action="store_true",
@@ -99,7 +102,7 @@ def main():
         help="The root directory of the source in which the patches will be applied.",
     )
     parser.add_argument(
-        '--project-metadata',
+        "--project-metadata",
         type=Path,
         help="The path to the yaml saving the patch metadata, from which we can get the source_root",
     )
@@ -119,10 +122,13 @@ def main():
         help="Path to the json file with info on the PoI function/method",
     )
     parser.add_argument(
-        "--indices-by-commit", type=Path, help="Path to the indices of changed functions for each commit"
+        "--indices-by-commit",
+        type=Path,
+        help="Path to the indices of changed functions for each commit",
     )
     parser.add_argument(
-        "--coverage-build-artifacts-path", type=Path,
+        "--coverage-build-artifacts-path",
+        type=Path,
         help="Path to the directory that contains the coverage build artifacts",
     )
     #
@@ -212,7 +218,9 @@ def main():
         type=Path,
         help="The path to save the verified patch.",
     )
-    parser.add_argument("--patch-meta-output-dir", type=Path, help="The path to save the patch metadata")
+    parser.add_argument(
+        "--patch-meta-output-dir", type=Path, help="The path to save the patch metadata"
+    )
     parser.add_argument(
         "--raw-report",
         type=Path,
@@ -244,9 +252,7 @@ def main():
     )
 
     parser.add_argument(
-        "--patch-planning",
-        action="store_true",
-        help="Plan the patching process."
+        "--patch-planning", action="store_true", help="Plan the patching process."
     )
 
     parser.add_argument(
@@ -256,9 +262,7 @@ def main():
     )
 
     parser.add_argument(
-        "--bypassing-inputs",
-        type=str,
-        help="The bypassing inputs from fuzz pass"
+        "--bypassing-inputs", type=str, help="The bypassing inputs from fuzz pass"
     )
     #
     # Patch Request Metadata
@@ -275,6 +279,7 @@ def main():
         patcher: Patcher = None
         if args.generate_aixcc_patch:
             from patchery.aicc_patcher import AICCPatcher
+
             patcher = AICCPatcher.from_files(
                 target_root=args.target_root,
                 source_root=args.source_root,
@@ -312,14 +317,16 @@ def main():
             sys.exit(0)
         else:
             sys.exit(1)
-                
+
     elif args.rank_patches:
         #
         # Patch Ranking
         #
 
         if not args.rank_patches.exists():
-            raise FileNotFoundError(f"Patch directory '{args.rank_patches}' does not exist")
+            raise FileNotFoundError(
+                f"Patch directory '{args.rank_patches}' does not exist"
+            )
 
         PatchRanker.rank_many_aicc_patch_dirs(
             patches_dir=args.rank_patches,
@@ -336,7 +343,9 @@ def main():
         #
 
         if not args.deduplicate_patches.exists():
-            raise FileNotFoundError(f"Patch directory '{args.deduplicate_patches}' does not exist")
+            raise FileNotFoundError(
+                f"Patch directory '{args.deduplicate_patches}' does not exist"
+            )
 
         PatchDeduplicator.dedupe_many_aicc_patch_dirs(
             args.deduplicate_patches,
